@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water and Wood: Building Two Playable Yorùbá Epics</title>
+
+<!-- SEO -->
+<meta name="description" content="How two Fagunwa novels became two Android narrative RPGs — a look inside the shared engine, the stat-gated storytelling, and the procedural art behind Ìrèké Oníbùdó and Akara-ogun's journey through Igbo Irúnmọlẹ̀.">
+<meta name="author" content="niyid">
+<meta name="keywords" content="Yoruba literature, D.O. Fagunwa, Ireke Onibudo, Ogboju Ode, interactive fiction, narrative RPG, Kotlin, Jetpack Compose, Android, Techducat, game design">
+
+<!-- Open Graph (Substack, Facebook, LinkedIn link previews) -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="Water and Wood: Building Two Playable Yorùbá Epics">
+<meta property="og:description" content="Two Android narrative RPGs, one shared engine, and a pair of Fagunwa novels reimagined as branching, stat-gated interactive fiction — with procedural art and no external assets.">
+<meta property="og:url" content="https://niyid.github.io/irekeonibudo/fagunwa-rpgs-article.html">
+<meta property="og:site_name" content="Techducat">
+<meta property="article:author" content="https://github.com/niyid">
+
+<!-- Twitter/X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Water and Wood: Building Two Playable Yorùbá Epics">
+<meta name="twitter:description" content="Inside the engine behind Ìrèké Oníbùdó and Akara-ogun's journey through Igbo Irúnmọlẹ̀ — two narrative RPGs built from one lean Kotlin/Compose core.">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://niyid.github.io/irekeonibudo/fagunwa-rpgs-article.html">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg:           #080907;
+    --surface:      #0d100c;
+    --panel:        #12160f;
+    --border:       #22271d;
+    --border-hi:    #3a4230;
+    --gold:         #d9a441;
+    --gold-dim:     rgba(217,164,65,0.14);
+    --sea:          #2f7a82;
+    --sea-dim:      rgba(47,122,130,0.14);
+    --forest:       #4a8f63;
+    --forest-dim:   rgba(74,143,99,0.14);
+    --red:          #b3402b;
+    --red-dim:      rgba(179,64,43,0.14);
+    --violet:       #8a76c9;
+    --text:         #e9e4d6;
+    --muted:        #7c8577;
+    --muted-hi:     #b3ae9c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─────────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(217,164,65,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(217,164,65,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── LAYOUT ─────────────────────────────────────────────────── */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 28px 96px;
+  }
+
+  /* ─── HERO ───────────────────────────────────────────────────── */
+  .hero { padding: 80px 0 64px; border-bottom: 1px solid var(--border); margin-bottom: 64px; position: relative; }
+
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 28px;
+  }
+  .hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+
+  h1 {
+    font-family: 'Playfair Display', serif; font-size: clamp(36px, 6vw, 66px);
+    font-weight: 900; line-height: 1.06; letter-spacing: -0.02em; margin-bottom: 28px;
+  }
+  h1 .accent { color: var(--gold); }
+  h1 .italic { font-style: italic; }
+
+  .hero-meta {
+    display: flex; align-items: center; gap: 20px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 32px; flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta .sep { color: var(--border-hi); }
+
+  .hero-lead {
+    font-size: 18px; font-weight: 300; color: var(--muted-hi); line-height: 1.7; max-width: 680px;
+    border-left: 3px solid var(--gold); padding-left: 20px;
+  }
+
+  .ghost-hero { position: absolute; right: -10px; top: 30px; width: 190px; opacity: 0.08; pointer-events: none; }
+
+  /* ─── SECTION STRUCTURE ──────────────────────────────────────── */
+  section { margin-bottom: 72px; }
+
+  .section-kicker {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-kicker::after { content: ''; display: block; flex: 1; height: 1px; background: var(--border); }
+
+  h2 {
+    font-family: 'Playfair Display', serif; font-size: clamp(24px, 3.5vw, 36px); font-weight: 700;
+    line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 24px;
+  }
+  h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+
+  p { margin-bottom: 18px; color: var(--muted-hi); }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--text); font-weight: 500; }
+  a { color: var(--gold); }
+
+  /* ─── GAME BADGES ────────────────────────────────────────────── */
+  .game-badge {
+    display: inline-flex; align-items: center; gap: 6px; border-radius: 4px; padding: 3px 10px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .badge-sea    { background: var(--sea-dim);    color: #6fb3ba; border: 1px solid rgba(47,122,130,0.35); }
+  .badge-forest { background: var(--forest-dim); color: #7fc296; border: 1px solid rgba(74,143,99,0.35); }
+
+  /* ─── PULL QUOTE ─────────────────────────────────────────────── */
+  .pull-quote {
+    background: var(--gold-dim); border: 1px solid rgba(217,164,65,0.25); border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0; padding: 24px 28px; margin: 32px 0;
+  }
+  .pull-quote p { font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; line-height: 1.6; color: var(--text); margin-bottom: 10px; }
+  .pull-quote cite { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; }
+
+  /* ─── SIGNATURE DIVIDER: wave becomes canopy ─────────────────── */
+  .thread-divider { margin: 56px 0; text-align: center; }
+  .thread-divider svg { width: 100%; max-width: 560px; height: auto; }
+  .thread-divider-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-top: 10px;
+  }
+
+  /* ─── PILLARS GRID ───────────────────────────────────────────── */
+  .pillars-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+  @media (max-width: 600px) { .pillars-grid { grid-template-columns: 1fr; } }
+
+  .pillar {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 22px 20px;
+    position: relative; overflow: hidden; transition: border-color 0.2s;
+  }
+  .pillar:hover { border-color: var(--border-hi); }
+  .pillar-icon { font-size: 26px; margin-bottom: 12px; display: block; }
+  .pillar-name {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .pillar h3 { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+  .pillar p { font-size: 13px; line-height: 1.6; color: var(--muted); margin: 0; }
+  .pillar-gold    { border-left: 3px solid var(--gold); }
+  .pillar-sea     { border-left: 3px solid var(--sea); }
+  .pillar-forest  { border-left: 3px solid var(--forest); }
+  .pillar-violet  { border-left: 3px solid var(--violet); }
+  .pillar-red     { border-left: 3px solid var(--red); }
+
+  /* ─── STAT BARS ──────────────────────────────────────────────── */
+  .stat-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 26px 26px; margin: 28px 0; }
+  .stat-row { display: grid; grid-template-columns: 110px 1fr 40px; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: var(--muted-hi); }
+  .stat-track { height: 8px; background: var(--panel); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .stat-fill { height: 100%; border-radius: 4px; }
+  .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); text-align: right; }
+  .fill-igboya { background: linear-gradient(90deg, var(--red), var(--gold)); }
+  .fill-oogun { background: linear-gradient(90deg, var(--violet), var(--sea)); }
+  .fill-ilera { background: linear-gradient(90deg, var(--forest), #7fc296); }
+
+  /* ─── CHARM / CREATURE LIST ──────────────────────────────────── */
+  .item-list { display: flex; flex-direction: column; gap: 0; margin: 28px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .item-row { display: grid; grid-template-columns: 160px 1fr; gap: 18px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .item-row:last-child { border-bottom: none; }
+  .item-row:nth-child(odd) { background: rgba(255,255,255,0.012); }
+  .item-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--gold); letter-spacing: 0.03em; }
+  .item-desc { font-size: 13.5px; color: var(--muted-hi); line-height: 1.55; }
+  @media (max-width: 600px) { .item-row { grid-template-columns: 1fr; gap: 4px; } }
+
+  /* ─── CODE SNIPPET ───────────────────────────────────────────── */
+  .code-block { background: #060705; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 28px 0; font-size: 13px; }
+  .code-header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .code-header span { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+  .code-header .lang { color: var(--gold); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .code-body { padding: 20px 20px; font-family: 'IBM Plex Mono', monospace; line-height: 1.7; overflow-x: auto; white-space: pre; font-size: 12.5px; }
+  .kw { color: #c792ea; } .fn { color: #82aaff; } .str { color: #c3e88d; } .num { color: #f78c6c; }
+  .cm { color: #5c6a55; font-style: italic; } .ty { color: #ffcb6b; } .prop { color: var(--gold); }
+
+  /* ─── FLOW STEPS ─────────────────────────────────────────────── */
+  .flow-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px 28px; margin: 32px 0; }
+  .diagram-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .flow-steps-list { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+  .flow-step { display: grid; grid-template-columns: 40px 1fr; gap: 16px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-step-num {
+    width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .step-gold   { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(217,164,65,0.3); }
+  .step-sea    { background: var(--sea-dim);    color: #6fb3ba;       border: 1px solid rgba(47,122,130,0.3); }
+  .step-forest { background: var(--forest-dim); color: #7fc296;       border: 1px solid rgba(74,143,99,0.3); }
+  .step-red    { background: var(--red-dim);    color: #d97a63;      border: 1px solid rgba(179,64,43,0.3); }
+  .step-violet { background: rgba(138,118,201,0.14); color: var(--violet); border: 1px solid rgba(138,118,201,0.3); }
+  .flow-step-content strong { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .flow-step-content p { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.55; }
+
+  /* ─── COMPARISON CARDS (Substack-safe, no <table>) ───────────── */
+  .compare-cards { display: flex; flex-direction: column; gap: 0; margin: 28px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .compare-header { display: grid; grid-template-columns: 150px 1fr 1fr; background: var(--panel); border-bottom: 2px solid var(--border-hi); }
+  .compare-header-cell { padding: 12px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .compare-header-cell:nth-child(1) { color: var(--muted); }
+  .compare-header-cell:nth-child(2) { color: #6fb3ba; border-left: 1px solid var(--border); }
+  .compare-header-cell:nth-child(3) { color: #7fc296; border-left: 1px solid var(--border); }
+  .compare-row { display: grid; grid-template-columns: 150px 1fr 1fr; border-bottom: 1px solid var(--border); }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row:hover { background: rgba(255,255,255,0.016); }
+  .compare-cell { padding: 14px 16px; font-size: 13.5px; line-height: 1.5; }
+  .compare-cell:nth-child(2), .compare-cell:nth-child(3) { border-left: 1px solid var(--border); }
+  .compare-cell.dim-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 580px) {
+    .compare-header { grid-template-columns: 1fr; }
+    .compare-header-cell:nth-child(1) { display: none; }
+    .compare-header-cell:nth-child(2), .compare-header-cell:nth-child(3) { border-left: none; border-top: 1px solid var(--border); }
+    .compare-row { grid-template-columns: 1fr; }
+    .compare-cell.dim-label { background: var(--panel); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 16px 4px; }
+    .compare-cell:nth-child(2), .compare-cell:nth-child(3) { border-left: none; padding-top: 6px; padding-bottom: 6px; }
+    .compare-cell:nth-child(3) { padding-bottom: 14px; }
+  }
+
+  /* ─── TECH STACK PILLS ───────────────────────────────────────── */
+  .tech-stack { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+  .tech-pill {
+    display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--muted-hi); letter-spacing: 0.05em; transition: border-color 0.2s, color 0.2s;
+  }
+  .tech-pill:hover { border-color: var(--border-hi); color: var(--text); }
+  .tech-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-gold { background: var(--gold); } .dot-sea { background: var(--sea); } .dot-forest { background: var(--forest); } .dot-violet { background: var(--violet); }
+
+  /* ─── CALLOUT BOXES ──────────────────────────────────────────── */
+  .callout { border-radius: 8px; padding: 18px 20px; margin: 24px 0; display: flex; gap: 14px; align-items: flex-start; }
+  .callout-warn { background: var(--red-dim); border: 1px solid rgba(179,64,43,0.25); }
+  .callout-info { background: var(--sea-dim); border: 1px solid rgba(47,122,130,0.25); }
+  .callout-good { background: var(--gold-dim); border: 1px solid rgba(217,164,65,0.25); }
+  .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body p { font-size: 13.5px; margin: 0; line-height: 1.6; }
+  .callout-body strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+  /* ─── FOOTER ─────────────────────────────────────────────────── */
+  .article-footer { border-top: 1px solid var(--border); padding-top: 40px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+  .footer-left p { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; margin: 0 0 6px; }
+  .footer-links { display: flex; gap: 12px; flex-wrap: wrap; }
+  .footer-link {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--gold-dim); border: 1px solid rgba(217,164,65,0.3);
+    border-radius: 6px; padding: 10px 18px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--gold);
+    text-decoration: none; letter-spacing: 0.08em; transition: background 0.2s;
+  }
+  .footer-link:hover { background: rgba(217,164,65,0.22); }
+
+  @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .hero { animation: fadeSlideUp 0.7s ease both; }
+  section { animation: fadeSlideUp 0.6s ease both; }
+
+  @media (max-width: 600px) {
+    .container { padding: 0 16px 64px; }
+    .hero { padding: 48px 0 40px; }
+    .ghost-hero { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero">
+    <div class="hero-eyebrow">Interactive Fiction · Yorùbá Literature · Android / Kotlin</div>
+
+    <h1>
+      <span class="italic accent">Water</span> and <span class="italic accent">Wood</span>:<br>
+      Building Two Playable<br>
+      Yorùbá <span class="accent">Epics</span>
+    </h1>
+
+    <div class="hero-meta">
+      <span>📅 July 2026</span>
+      <span class="sep">·</span>
+      <span>🔗 github.com/niyid/irekeonibudo · github.com/niyid/ogbojuode</span>
+      <span class="sep">·</span>
+      <span>📱 Android · Kotlin · Jetpack Compose</span>
+      <span class="sep">·</span>
+      <span>⏱ 14 min read</span>
+    </div>
+
+    <p class="hero-lead">
+      Two Android narrative RPGs, one lean engine underneath both. <strong>Ìrèké Oníbùdó</strong> sends an
+      orphan from a shipwreck into a sea-queen's court and up a mountain toward a crown. <strong>Akara-ogun's
+      journey through Igbo Irúnmọlẹ̀</strong> sends a hunter's son past bush-spirits into the court of a
+      forest king. Both are original stories built on the world and character names of D.O. Fagunwa's two
+      founding Yorùbá novels — and both prove the same idea: that reading carefully, not swinging hardest, is
+      what actually gets you through a story like this alive.
+    </p>
+
+    <svg class="ghost-hero" viewBox="0 0 160 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 170 Q 40 150 60 170 T 100 170 T 140 170" stroke="#d9a441" stroke-width="3" fill="none" opacity="0.6"/>
+      <path d="M80 20 L80 120 M80 40 Q60 30 50 50 M80 60 Q100 50 110 70 M80 80 Q55 70 45 90" stroke="#4a8f63" stroke-width="3" fill="none" opacity="0.6"/>
+      <circle cx="80" cy="20" r="6" fill="#d9a441" opacity="0.7"/>
+    </svg>
+  </header>
+
+  <!-- ═══ SECTION: THE SOURCE ═══ -->
+  <section>
+    <div class="section-kicker">The Source</div>
+    <h2>Two Novels That Started Yorùbá Prose Fiction</h2>
+    <p>
+      Daniel Ọlọrunfẹmi Fagunwa published <em>Ògbójú Ọdẹ nínú Igbó Irúnmọlẹ̀</em> ("The Brave Hunter in the
+      Forest of Spirits") in 1938 — the first full-length novel ever published in the Yorùbá language — and
+      followed it in 1949 with <em>Ìrèké Oníbùdó</em>. Both books move through the same imaginative territory:
+      a hunter or orphan sets out from an ordinary village, crosses into a supernatural wilderness of spirits,
+      shape-shifters and monsters, and comes home changed by what the journey demanded of them rather than by
+      what they defeated. Wole Soyinka's 1968 English translation of the first novel, <em>The Forest of a
+      Thousand Daemons</em>, is often the doorway English readers use to reach Fagunwa at all.
+    </p>
+    <p>
+      These two apps are not retellings of that prose. They are original branching narratives that borrow the
+      setting, the character names, and the moral grammar of Fagunwa's world — an orphan going down to open
+      water, a hunter's son going into a forest of spirits — and build new, playable stories inside it. No text
+      from either novel or its translation is reproduced anywhere in either codebase.
+    </p>
+    <div class="pull-quote">
+      <p>"The water will ask what you're worth before it lets you cross. Answer it with panic, and it keeps you."</p>
+      <cite>— The Diviner, Ìrèké Oníbùdó</cite>
+    </div>
+  </section>
+
+  <!-- ═══ SECTION: ONE ENGINE ═══ -->
+  <section>
+    <div class="section-kicker">Architecture</div>
+    <h2>One Engine, Two Worlds</h2>
+    <p>
+      Both games are separate Android projects, but they share an identical spine: Kotlin, Jetpack Compose with
+      Material3, Room for save/continue, a single Activity driven by one <code>StateFlow&lt;GameState&gt;</code>,
+      and a Canvas-based scene renderer that draws every illustration procedurally — no imported art, no photos,
+      no third-party visual assets in either app. The renderer keys off a shared seven-value <code>SceneType</code>
+      enum (<code>VILLAGE</code>, <code>FOREST_PATH</code>, <code>RIVER</code>, <code>CAVE</code>,
+      <code>SPIRIT_COURT</code>, <code>VICTORY</code>, <code>DEATH</code>), reused across both stories but drawn
+      differently depending on which game's palette is active — deep sea blues and ember gold for Ìrèké, forest
+      greens and the same ember gold for Akara-ogun, so the two apps read as a family rather than a template
+      copy-pasted twice.
+    </p>
+
+    <div class="tech-stack">
+      <span class="tech-pill"><span class="dot dot-gold"></span> Kotlin</span>
+      <span class="tech-pill"><span class="dot dot-sea"></span> Jetpack Compose (Material3)</span>
+      <span class="tech-pill"><span class="dot dot-forest"></span> Room persistence</span>
+      <span class="tech-pill"><span class="dot dot-violet"></span> StateFlow, no DI framework</span>
+      <span class="tech-pill"><span class="dot dot-gold"></span> Canvas procedural art</span>
+      <span class="tech-pill"><span class="dot dot-sea"></span> Single Activity</span>
+    </div>
+
+    <p>
+      Neither project reaches for Hilt or a navigation library — a single <code>GameNavigation.kt</code> switches
+      screens off one <code>Screen</code> enum (<code>TITLE</code>, <code>STORY</code>, <code>ENCOUNTER</code>,
+      <code>INVENTORY</code>, <code>ENDING</code>), and a single <code>GameViewModel</code> per app owns both the
+      branching-story engine and the turn-based combat loop. It's a deliberately small surface area for what the
+      README of each project calls being "kept intentionally lean."
+    </p>
+  </section>
+
+  <div class="thread-divider">
+    <svg viewBox="0 0 560 90" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 60 C 40 40, 80 80, 120 60 S 200 40, 240 60" stroke="#2f7a82" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M240 60 C 260 45, 270 30, 280 10" stroke="#d9a441" stroke-width="2" fill="none" opacity="0.7"/>
+      <path d="M280 10 C 320 30, 300 55, 340 45 C 380 35, 380 65, 420 55 C 460 45, 460 70, 500 60 C 520 55, 540 60, 560 55"
+            stroke="#4a8f63" stroke-width="2.5" fill="none" opacity="0.85"/>
+    </svg>
+    <div class="thread-divider-label">Current becomes canopy — one engine, two settings</div>
+  </div>
+
+  <!-- ═══ SECTION: DESIGN PRINCIPLES ═══ -->
+  <section>
+    <div class="section-kicker">Philosophy</div>
+    <h2>Five Design Principles Both Games Share</h2>
+
+    <div class="pillars-grid">
+      <div class="pillar pillar-gold">
+        <span class="pillar-icon">📖</span>
+        <div class="pillar-name">Principle 01</div>
+        <h3>Content Is Data, Not Code</h3>
+        <p>Every node, choice, creature, and charm lives as plain <code>StoryNode</code>/<code>Choice</code>/<code>Creature</code> values in one file. Adding a scene means adding data, never touching the engine.</p>
+      </div>
+      <div class="pillar pillar-sea">
+        <span class="pillar-icon">🎨</span>
+        <div class="pillar-name">Principle 02</div>
+        <h3>No External Art</h3>
+        <p>Every illustration is drawn at runtime by <code>SceneCanvas</code> from primitive shapes, gradients, and glow — original vector art, not licensed or generated imagery.</p>
+      </div>
+      <div class="pillar pillar-forest">
+        <span class="pillar-icon">⚖️</span>
+        <div class="pillar-name">Principle 03</div>
+        <h3>Real Trade-offs, Not Flavor Text</h3>
+        <p>Choices can be gated behind a minimum stat, a specific charm, or a story flag you earned earlier — meaning some doors are genuinely closed until you've paid for them.</p>
+      </div>
+      <div class="pillar pillar-violet">
+        <span class="pillar-icon">💀</span>
+        <div class="pillar-name">Principle 04</div>
+        <h3>Death Is a Valid Ending</h3>
+        <p>Every creature has a <code>defeatNodeId</code> that leads to a real, written ending — losing a fight is a documented outcome, not a game-over screen that discards your story.</p>
+      </div>
+      <div class="pillar pillar-red">
+        <span class="pillar-icon">🪶</span>
+        <div class="pillar-name">Principle 05</div>
+        <h3>Borrow the World, Invent the Plot</h3>
+        <p>Setting and names come from Fagunwa's two novels; every scene, choice, and line of dialogue is original — neither game reproduces text from either book or its translation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CASE STUDY I ═══ -->
+  <section>
+    <div class="section-kicker">Case Study I</div>
+    <span class="game-badge badge-sea">Deep Sea Blue · Ember Gold</span>
+    <h2>Ìrèké Oníbùdó — From Shipwreck to Crown</h2>
+    <p>
+      You play Ìrèké, orphaned three years and owning nothing but a single cowrie shell from his late mother's
+      waist-beads, in a town gone lawless enough that the people meant to keep order are the ones doing the
+      stealing. A trading ship is the only visible door out — and the storm that sinks it two days later
+      "does not behave like weather. It behaves like something looking for someone." Ìrèké goes into the water
+      and surfaces in the sunken court of <strong>Arogidigba</strong>, queen of the deep, whose hospitality is
+      "a hunger dressed up" as welcome. Escaping her court doesn't end the journey — it opens onto a
+      serpent-haunted town, a flying python demanding tribute, a mountain where the sage Itanforiti tests what
+      you've actually learned, and finally a sick princess, Ifepade, whose cure depends less on courage than on
+      what kind of person you chose to be along the way.
+    </p>
+
+    <div class="stat-panel">
+      <div class="stat-row">
+        <span class="stat-label">Ìgbóyà (courage)</span>
+        <div class="stat-track"><div class="stat-fill fill-igboya" style="width:50%"></div></div>
+        <span class="stat-value">50</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Ògùn (charm power)</span>
+        <div class="stat-track"><div class="stat-fill fill-oogun" style="width:45%"></div></div>
+        <span class="stat-value">45</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Ìlera (health)</span>
+        <div class="stat-track"><div class="stat-fill fill-ilera" style="width:100%"></div></div>
+        <span class="stat-value">100</span>
+      </div>
+    </div>
+
+    <h3>Charms You Can Earn</h3>
+    <div class="item-list">
+      <div class="item-row"><span class="item-name">Owó Ẹyọ Ìyá</span><span class="item-desc">A single cowrie shell from your late mother's waist-beads — your starting charm, and all you carry of her.</span></div>
+      <div class="item-row"><span class="item-name">Ojú-Inú</span><span class="item-desc">Inner sight taught by an old turtle-spirit; sees past disguise and finds an enemy's weak point.</span></div>
+      <div class="item-row"><span class="item-name">Iyanrin Ìfayabalẹ̀</span><span class="item-desc">Blessed sand that, stirred into troubled water, halves the next blow you take.</span></div>
+      <div class="item-row"><span class="item-name">Ìwo Idẹ</span><span class="item-desc">A brass horn taken from a beaten guardian; its note unsettles lesser creatures into flight.</span></div>
+      <div class="item-row"><span class="item-name">Ewé Ìwòsàn</span><span class="item-desc">A healing leaf from Arogidigba's ruined garden — chews into 20–30 points of restored health, single use.</span></div>
+      <div class="item-row"><span class="item-name">Àmì Adéọrun</span><span class="item-desc">A carved token whose meaning stays unclear until the very end — not usable in combat, but the key to a hidden ending.</span></div>
+    </div>
+
+    <h3>Who Stands in the Way</h3>
+    <div class="item-list">
+      <div class="item-row"><span class="item-name">Yanyan Ẹ̀ṣọ́</span><span class="item-desc">A canoe-length shark scaled in dull bronze, guarding the water-gate of Arogidigba's sunken court.</span></div>
+      <div class="item-row"><span class="item-name">Arogidigba</span><span class="item-desc">Queen of the deep water — half a woman's grace, half something far older, with a hunger dressed up as hospitality.</span></div>
+      <div class="item-row"><span class="item-name">The Flying Ejò</span><span class="item-desc">A python with wings of torn cloud, wide enough to shadow the whole market square of Àlùpàyìdá, come to collect a promised tribute.</span></div>
+    </div>
+
+    <div class="callout callout-good">
+      <span class="callout-icon">👑</span>
+      <div class="callout-body">
+        <strong>Four ways to end it</strong>
+        <p>Ìrèké's climax is a bedside choice, not a battle: how you propose to cure the ailing Ifepade decides
+        whether the ending is a love story, a redeemed king, a quietly competent hero who lets the credit fall
+        where it wants to — or, if you carried an unspent token from the spirit Adéọrun and a flag earned
+        much earlier in the story, a fourth ending that resolves an entirely different debt. 59 story nodes lead
+        to 7 possible endings in total, including the three ways the journey can end in death.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="thread-divider">
+    <svg viewBox="0 0 560 90" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 55 C 40 70, 60 40, 100 50 C 140 60, 160 30, 200 45" stroke="#4a8f63" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M200 45 C 230 35, 250 55, 280 40" stroke="#d9a441" stroke-width="2" fill="none" opacity="0.7"/>
+      <path d="M280 40 C 320 55, 340 30, 380 60 S 460 40, 500 60 S 540 45, 560 55" stroke="#2f7a82" stroke-width="2.5" fill="none" opacity="0.85"/>
+    </svg>
+    <div class="thread-divider-label">Canopy becomes current — the second journey begins</div>
+  </div>
+
+  <!-- ═══ CASE STUDY II ═══ -->
+  <section>
+    <div class="section-kicker">Case Study II</div>
+    <span class="game-badge badge-forest">Forest Green · Ember Gold</span>
+    <h2>Akara-ogun's Journey Through Igbo Irúnmọlẹ̀</h2>
+    <p>
+      Where Ìrèké begins with a shipwreck, Akara-ogun begins with a decision to leave — a hunter's son from
+      Àyé-Oró village, following his father Alabi's trade into the Forest of Spirits, guided from the outset by
+      the wise woman <strong>Ìmọ̀dòyè</strong> rather than stumbling into guidance the way Ìrèké does. The forest
+      answers that guidance with escalating tests: <strong>Agbako</strong>, a shrieking spirit of sudden calamity
+      "tall as an iroko tree"; <strong>Ẹ̀gbin</strong>, a bloated marsh-beast whose breath rots the leaves for a
+      mile around, guarding the crossing to the spirit-king's court; and finally a Court Sentinel in beaten bronze
+      armor, bound to test any mortal who seeks audience with <strong>King Aramada</strong> himself. The story ends
+      not with a battle but with a question the king asks directly: why did you truly enter this forest? — and the
+      honesty of your answer, not your combat record, is what the ending actually judges.
+    </p>
+
+    <div class="stat-panel">
+      <div class="stat-row">
+        <span class="stat-label">Ìgbóyà (courage)</span>
+        <div class="stat-track"><div class="stat-fill fill-igboya" style="width:55%"></div></div>
+        <span class="stat-value">55</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Ògùn (charm power)</span>
+        <div class="stat-track"><div class="stat-fill fill-oogun" style="width:40%"></div></div>
+        <span class="stat-value">40</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Ìlera (health)</span>
+        <div class="stat-track"><div class="stat-fill fill-ilera" style="width:100%"></div></div>
+        <span class="stat-value">100</span>
+      </div>
+    </div>
+
+    <h3>Charms You Can Earn</h3>
+    <div class="item-list">
+      <div class="item-row"><span class="item-name">Ọdẹ's Amulet</span><span class="item-desc">A hunter's charm handed down from your father, Alabi — your starting charm.</span></div>
+      <div class="item-row"><span class="item-name">Eye of Ìmọ̀dòyè</span><span class="item-desc">Lets its bearer see through a spirit's disguise, and expose a weak point mid-fight.</span></div>
+      <div class="item-row"><span class="item-name">Òkúta Omi</span><span class="item-desc">A smooth river stone that calms a raging current — halves the next hit you take in combat.</span></div>
+      <div class="item-row"><span class="item-name">Fèrè Irin</span><span class="item-desc">An iron whistle whose cry frightens lesser bush-spirits into fleeing outright.</span></div>
+      <div class="item-row"><span class="item-name">Ewé Ọ̀sányìn</span><span class="item-desc">A healing leaf blessed by the spirit of medicine — single-use, restores a meaningful chunk of health.</span></div>
+      <div class="item-row"><span class="item-name">Kọ́kọ́rọ́ Egungun</span><span class="item-desc">A bone key found where the court hoped no mortal would look — unlocks the rarest of the four endings.</span></div>
+    </div>
+
+    <h3>Who Stands in the Way</h3>
+    <div class="item-list">
+      <div class="item-row"><span class="item-name">Agbako</span><span class="item-desc">A shrieking spirit of sudden calamity, tall as an iroko tree, with a hundred restless eyes along each arm.</span></div>
+      <div class="item-row"><span class="item-name">Ẹ̀gbin</span><span class="item-desc">A bloated marsh-beast whose breath rots the leaves for a mile around, guarding the crossing to the spirit-king's court.</span></div>
+      <div class="item-row"><span class="item-name">The Court Sentinel</span><span class="item-desc">A spirit-warrior in beaten bronze armor, bound to test any mortal who seeks audience with King Aramada.</span></div>
+    </div>
+
+    <div class="callout callout-good">
+      <span class="callout-icon">🌿</span>
+      <div class="callout-body">
+        <strong>The question behind the question</strong>
+        <p>King Aramada's final question has four possible honest answers, each gated differently: pride needs
+        nothing, wisdom needs 55+ Ògùn, courage needs 60+ Ìgbóyà, and staying silent while holding out the bone
+        key bypasses the question entirely for the strangest ending of the four. 41 story nodes lead to 7
+        possible endings, including the three ways the forest can end you instead.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ COMPARISON ═══ -->
+  <section>
+    <div class="section-kicker">Side by Side</div>
+    <h2>Two Journeys, One Grammar</h2>
+    <p>Laid next to each other, the two games turn out to be variations on a single underlying test: what does this person actually deserve, once the fighting stops?</p>
+
+    <div class="compare-cards">
+      <div class="compare-header">
+        <div class="compare-header-cell">Dimension</div>
+        <div class="compare-header-cell">Ìrèké Oníbùdó</div>
+        <div class="compare-header-cell">Akara-ogun</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Inciting event</div>
+        <div class="compare-cell">Swept overboard in an unnatural storm</div>
+        <div class="compare-cell">Chooses to follow his father's hunting trade into the forest</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Guiding figure</div>
+        <div class="compare-cell">Earned gradually — an old diviner, a turtle-spirit, a sage on a mountain</div>
+        <div class="compare-cell">Present from early on — the wise woman Ìmọ̀dòyè</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Central antagonist</div>
+        <div class="compare-cell">Arogidigba, sea-queen whose hospitality hides appetite</div>
+        <div class="compare-cell">King Aramada, spirit-king who judges rather than devours</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Climax mechanic</div>
+        <div class="compare-cell">A bedside choice about how to cure Ifepade</div>
+        <div class="compare-cell">A direct question about your true motive</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Story nodes</div>
+        <div class="compare-cell">59</div>
+        <div class="compare-cell">41</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Endings</div>
+        <div class="compare-cell">7 (4 victory, 3 death)</div>
+        <div class="compare-cell">7 (4 victory, 3 death)</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Palette</div>
+        <div class="compare-cell">Deep sea blue, coral, ember gold</div>
+        <div class="compare-cell">Forest green, river blue, ember gold</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MECHANICS ═══ -->
+  <section>
+    <div class="section-kicker">Mechanics</div>
+    <h2>Combat, By the Numbers</h2>
+    <p>
+      Both games run the same turn-based encounter math, tuned from a small set of named constants rather than
+      magic numbers scattered through the code — which is also why balancing either game means editing one
+      block, not hunting through logic:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header"><span>GameViewModel.kt</span><span class="lang">Kotlin</span></div>
+      <div class="code-body"><span class="kw">companion object</span> {
+    <span class="kw">private const val</span> PLAYER_BASE_HIT_CHANCE = <span class="num">45</span>   <span class="cm">// + igboya / 2</span>
+    <span class="kw">private const val</span> PLAYER_CRIT_CHANCE = <span class="num">12</span>        <span class="cm">// % chance a landed hit doubles</span>
+    <span class="kw">private const val</span> ENEMY_BASE_HIT_CHANCE = <span class="num">55</span>     <span class="cm">// - oogun / 10</span>
+    <span class="kw">private const val</span> ENEMY_MIN_HIT_CHANCE = <span class="num">20</span>      <span class="cm">// floor so high OOGUN can't trivialize fights</span>
+    <span class="kw">const val</span> CHARM_OOGUN_COST = <span class="num">10</span>
+}</div>
+    </div>
+
+    <div class="flow-diagram">
+      <div class="diagram-title">Anatomy of a Player Turn</div>
+      <div class="flow-steps-list">
+        <div class="flow-step">
+          <div class="flow-step-num step-gold">1</div>
+          <div class="flow-step-content"><strong>Roll to hit</strong><p>Base 45% chance, plus half your current Ìgbóyà — courage genuinely raises your odds of connecting.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num step-sea">2</div>
+          <div class="flow-step-content"><strong>Check for a scouted weak point</strong><p>If a charm like Ojú-Inú / Eye of Ìmọ̀dòyè already found a weakness this fight, every hit gets a flat damage bonus.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num step-forest">3</div>
+          <div class="flow-step-content"><strong>Roll for a critical</strong><p>A landed hit has a 12% chance to double its damage — narrated differently each time so repeat fights don't read identically.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num step-violet">4</div>
+          <div class="flow-step-content"><strong>Spend Ògùn on a charm instead, if you'd rather</strong><p>Most charms cost 10 Ògùn to invoke — a real resource trade-off, not a free extra action.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num step-red">5</div>
+          <div class="flow-step-content"><strong>Hand control to the creature</strong><p>Enemy hit chance starts at 55% and drops with your Ògùn, floored at 20% so no build ever becomes untouchable.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">🐍</span>
+      <div class="callout-body">
+        <strong>Fleeing has consequences, not shame</strong>
+        <p>Every creature defines its own <code>fleeNodeId</code> alongside <code>victoryNodeId</code> and
+        <code>defeatNodeId</code> — running from the Flying Ejò or from Ẹ̀gbin routes you into a different,
+        fully-written branch of the story rather than just dumping you back at the last checkpoint.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CONTENT AS DATA ═══ -->
+  <section>
+    <div class="section-kicker">Extensibility</div>
+    <h2>Writing a Scene Without Touching the Engine</h2>
+    <p>
+      The whole point of keeping <code>StoryData.kt</code> as plain data is that adding to either game is a
+      writing task, not an engineering one. A single node carries its own scene type, its text, and a list of
+      choices — each of which can optionally demand a minimum stat, a specific charm, or a flag set earlier in
+      the run:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header"><span>StoryData.kt — an actual node from Ìrèké Oníbùdó</span><span class="lang">Kotlin</span></div>
+      <div class="code-body"><span class="ty">StoryNode</span>(
+    id = <span class="str">"shrine_blessing"</span>,
+    title = <span class="str">"The Diviner's Warning"</span>,
+    scene = SceneType.VILLAGE,
+    text = <span class="str">"...an orphan going down to open water," she says..."</span>,
+    grantsCharm = Charm.CALMING_SAND,
+    choices = listOf(
+        <span class="ty">Choice</span>(
+            text = <span class="str">"Thank her and run for the landing."</span>,
+            nextNodeId = <span class="str">"call_to_sea"</span>,
+            effects = listOf(<span class="ty">StatEffect</span>(Stat.OOGUN, <span class="num">5</span>))
+        )
+    )
+)</div>
+    </div>
+
+    <div class="callout callout-good">
+      <span class="callout-icon">🧩</span>
+      <div class="callout-body">
+        <strong>No UI changes required</strong>
+        <p>Point a <code>Choice.nextNodeId</code> at a new node id, and the engine handles rendering, gating,
+        and persistence automatically. This is exactly what both READMEs mean when they say extending the story
+        is "add a node, point a choice at it, done."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOR DEVELOPERS ═══ -->
+  <section>
+    <div class="section-kicker">Implementation Guide</div>
+    <h2>For Developers: Replicating This Pattern</h2>
+    <p>
+      Because both games share the same skeleton, adapting the pattern to a third story — another Fagunwa
+      novel, another oral epic entirely — mostly means repeating a short checklist:
+    </p>
+    <div class="flow-diagram">
+      <div class="flow-steps-list">
+        <div class="flow-step">
+          <div class="flow-step-num step-gold">1</div>
+          <div class="flow-step-content"><strong>Pick your three stats and their starting values</strong><p>Both games reuse Ìgbóyà / Ògùn / Ìlera, but the model works for any three-axis system with a clear meaning for each.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num step-sea">2</div>
+          <div class="flow-step-content"><strong>Write your creatures before your nodes</strong><p>Each <code>Creature</code> needs its own victory/defeat/flee node ids up front, so combat always resolves into real narrative rather than a dead end.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num step-forest">3</div>
+          <div class="flow-step-content"><strong>Design your palette around the setting, not the genre</strong><p>Sea story got blues and coral; forest story got greens. Let the world pick the color, and keep one shared accent (gold, here) to tie sibling apps together.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num step-violet">4</div>
+          <div class="flow-step-content"><strong>Gate at least one ending behind something earned, not rolled</strong><p>The rarest endings in both games require a specific charm plus a flag set many nodes earlier — reward attentive playthroughs, not just high stats.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CONCLUSION ═══ -->
+  <section>
+    <div class="section-kicker">Conclusion</div>
+    <h2>Courage Alone Gets You Killed More Than Once</h2>
+    <p>
+      Both READMEs open with the same warning, and it isn't marketing copy — it's the actual design thesis.
+      In both games, the character with the highest Ìgbóyà who never listens to a diviner, a turtle-spirit, or
+      a wise woman ends up in one of the death nodes just as reliably as the coward who never leaves the
+      village. What both stories reward, mechanically and narratively, is attention: to what a charm actually
+      does, to what a stat gate is actually asking of you, to what a spirit-king is actually asking when he
+      poses a question that sounds rhetorical but isn't. That's a harder thing to encode in a turn-based RPG
+      than "hit harder" — and it's the reason two very different journeys, a shipwreck and a walk into the
+      woods, ended up needing the exact same engine underneath them.
+    </p>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="article-footer">
+    <div class="footer-left">
+      <p>Both projects are open source — Kotlin, Jetpack Compose, no external art or paywalled assets.</p>
+      <p>github.com/niyid/irekeonibudo · github.com/niyid/ogbojuode</p>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link" href="https://github.com/niyid/irekeonibudo" target="_blank">🌊 Ìrèké Oníbùdó →</a>
+      <a class="footer-link" href="https://github.com/niyid/ogbojuode" target="_blank">🌳 Akara-ogun →</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
