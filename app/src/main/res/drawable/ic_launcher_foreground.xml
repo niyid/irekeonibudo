@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Simple original glyph: a hunter's spear crossing a rising sun -->
+    <path android:pathData="M34,70 A20,20 0 0 0 74,70 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="34"
+                android:startY="55"
+                android:endX="74"
+                android:endY="85"
+                android:startColor="#F0A94E"
+                android:endColor="#C05A22" />
+        </aapt:attr>
+    </path>
+    <path android:pathData="M54,20 L58,54 L54,88 L50,54 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="50"
+                android:startY="20"
+                android:endX="58"
+                android:endY="88"
+                android:startColor="#F3D998"
+                android:endColor="#C6892E" />
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FCEFD1"
+        android:fillAlpha="0.55"
+        android:pathData="M53,20 L54.6,54 L53,88 L52,54 Z" />
+    <path android:pathData="M54,16 L60,28 L48,28 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="48"
+                android:startY="16"
+                android:endX="60"
+                android:endY="28"
+                android:startColor="#F3D998"
+                android:endColor="#C6892E" />
+        </aapt:attr>
+    </path>
+</vector>

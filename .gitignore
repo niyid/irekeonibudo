@@ -1,0 +1,22 @@
+# Gradle
+.gradle/
+build/
+*/build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# Local config (per-machine SDK path, keystore secrets — never commit)
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystores
+*.jks
+*.keystore
