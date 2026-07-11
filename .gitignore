@@ -1,22 +1,36 @@
 # Gradle
 .gradle/
 build/
-*/build/
-gradle-app.setting
-!gradle-wrapper.jar
-.gradletasknamecache
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
-# Local config (per-machine SDK path, keystore secrets — never commit)
+# Local configuration file (SDK path, per-machine, never share)
 local.properties
 
 # Android Studio / IntelliJ
 .idea/
 *.iml
-.DS_Store
+*.ipr
+*.iws
+.navigation/
 captures/
 .externalNativeBuild/
 .cxx/
 
-# Keystores
+# Keystores — never commit signing keys
 *.jks
 *.keystore
+
+# Log/OS files
+*.log
+.DS_Store
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+
+# Room schema exports (only relevant if exportSchema = true; harmless if absent)
+app/schemas/
