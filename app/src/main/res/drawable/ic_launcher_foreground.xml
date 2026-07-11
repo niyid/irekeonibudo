@@ -5,46 +5,125 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Original glyph: a mother's cowrie shell (the game's opening charm) rising over open water -->
+    <!-- Crown of Onibudo: five-point gold crown rising from the sea, coral-gemmed,
+         a small serpent engraved on the band. Flat/vector, single bold silhouette,
+         built to survive the adaptive-icon circular mask and 48dp launcher size. -->
 
-    <!-- Two soft wave bands beneath the shell -->
+    <!-- Wave layers beneath the band -->
     <path
         android:strokeColor="#4FA3AE"
         android:strokeWidth="3.4"
         android:strokeAlpha="0.55"
         android:strokeLineCap="round"
-        android:pathData="M16,82 C24,74 34,74 42,82 C50,90 60,90 68,82 C76,74 86,74 94,82" />
+        android:pathData="M10,94 C19,86 29,86 37,94 C45,102 55,102 63,94 C71,86 81,86 89,94" />
     <path
         android:strokeColor="#2F7A82"
         android:strokeWidth="3.4"
         android:strokeAlpha="0.4"
         android:strokeLineCap="round"
-        android:pathData="M12,92 C21,84 33,84 42,92 C51,100 63,100 72,92 C81,84 93,84 102,92" />
+        android:pathData="M6,102 C15,94 27,94 36,102 C45,110 57,110 66,102 C75,94 87,94 96,102" />
 
-    <!-- Cowrie shell body -->
-    <path android:pathData="M32,52 C32,36 42,25 54,25 C66,25 76,36 76,52 C76,68 66,79 54,79 C42,79 32,68 32,52 Z">
+    <!-- Crown body: five points + band -->
+    <path android:pathData="M16,46 L24,60 L32,28 L43,54 L54,12 L65,54 L76,28 L84,60 L92,46 L94,70 L94,84 L14,84 L14,70 Z">
         <aapt:attr name="android:fillColor">
             <gradient
                 android:type="linear"
-                android:startX="32"
-                android:startY="25"
-                android:endX="76"
-                android:endY="79"
-                android:startColor="#F3D998"
-                android:endColor="#C6892E" />
+                android:startX="54"
+                android:startY="12"
+                android:endX="54"
+                android:endY="84"
+                android:startColor="#FBE7B0"
+                android:endColor="#B87A24" />
         </aapt:attr>
     </path>
-    <!-- Rim highlight -->
-    <path
-        android:fillColor="#FCEFD1"
-        android:fillAlpha="0.5"
-        android:pathData="M54,26 C64,26 73,36 73,52 C73,66 65,76 55,78 C64,74 70,64 70,52 C70,38 62,28 54,26 Z" />
 
-    <!-- Toothed aperture running down the shell's center -->
+    <!-- Point highlights (thin inner rim for dimension) -->
     <path
-        android:strokeColor="#5A3D14"
-        android:strokeWidth="2.6"
+        android:fillColor="#FFF6DE"
+        android:fillAlpha="0.45"
+        android:pathData="M54,16 L58,52 L54,50 L50,52 Z" />
+    <path
+        android:fillColor="#FFF6DE"
+        android:fillAlpha="0.3"
+        android:pathData="M32,30 L38,52 L34,51 L31,53 Z" />
+    <path
+        android:fillColor="#FFF6DE"
+        android:fillAlpha="0.3"
+        android:pathData="M76,30 L74,53 L71,51 L70,52 Z" />
+
+    <!-- Coral filigree, left prong -->
+    <path
+        android:strokeColor="#D98A4E"
+        android:strokeWidth="2.1"
+        android:strokeAlpha="0.85"
+        android:strokeLineCap="round"
+        android:pathData="M28,42 C24,38 22,34 23,29 M28,42 C22,41 18,40 15,36 M28,42 C25,46 22,47 18,47" />
+    <!-- Coral filigree, right prong -->
+    <path
+        android:strokeColor="#D98A4E"
+        android:strokeWidth="2.1"
+        android:strokeAlpha="0.85"
+        android:strokeLineCap="round"
+        android:pathData="M80,42 C84,38 86,34 85,29 M80,42 C86,41 90,40 93,36 M80,42 C83,46 86,47 90,47" />
+
+    <!-- Band, darker gold, gives base definition -->
+    <path android:pathData="M14,70 L94,70 L94,84 L14,84 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="70"
+                android:endX="54"
+                android:endY="84"
+                android:startColor="#C6892E"
+                android:endColor="#8F5C18" />
+        </aapt:attr>
+    </path>
+
+    <!-- Serpent engraved on the band: small, subordinate to the crown's silhouette -->
+    <path
+        android:strokeColor="#5C3A10"
+        android:strokeWidth="1.8"
+        android:strokeAlpha="0.8"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M54,33 L50,38 L58,43 L50,48 L58,53 L50,58 L58,63 L50,68 L54,72" />
+        android:pathData="M30,77 C36,73 40,81 46,77 C52,73 56,81 62,77 C68,73 72,81 78,77" />
+    <path android:fillColor="#5C3A10" android:fillAlpha="0.8"
+          android:pathData="M30,77 m-1.4,0 a1.4,1.4 0 1,0 2.8,0 a1.4,1.4 0 1,0 -2.8,0" />
+
+    <!-- Diamond-cut gems -->
+    <path android:pathData="M32,58 L37,66 L32,74 L27,66 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="27" android:startY="58"
+                android:endX="37" android:endY="74"
+                android:startColor="#8FE4E0"
+                android:endColor="#1C7A82" />
+        </aapt:attr>
+    </path>
+    <path android:pathData="M76,58 L81,66 L76,74 L71,66 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="71" android:startY="58"
+                android:endX="81" android:endY="74"
+                android:startColor="#8FE4E0"
+                android:endColor="#1C7A82" />
+        </aapt:attr>
+    </path>
+    <path android:pathData="M54,48 L60,58 L54,68 L48,58 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="48" android:startY="48"
+                android:endX="60" android:endY="68"
+                android:startColor="#A8F0EC"
+                android:endColor="#1C7A82" />
+        </aapt:attr>
+    </path>
+    <!-- Gem facet highlights -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M32,60 L34,66 L32,64 L30,66 Z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M76,60 L78,66 L76,64 L74,66 Z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M54,51 L57,58 L54,56 L51,58 Z" />
 </vector>
