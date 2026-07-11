@@ -27,7 +27,7 @@ app/src/main/java/com/techducat/irekeonibudo/
   data/        StoryNode/Choice/Creature/Player models, StoryData.kt (all narrative content),
                Room save-game persistence, GameState
   viewmodel/   GameViewModel — story branching + turn-based combat engine
-  ui/theme/    Colors, typography, dark forest/sea theme
+  ui/theme/    Colors, typography, dark sea-and-gold theme
   ui/components/  SceneCanvas (procedural scene art), StatBar, ChoiceButton, PlayerStatusBar
   ui/screens/  Title, Story, Encounter, Inventory, Ending
   navigation/  GameNavigation.kt — screen switch driven by GameState.screen

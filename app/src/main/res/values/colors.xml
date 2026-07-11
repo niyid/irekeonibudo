@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Mirrors ui/theme/Color.kt so the pre-Compose window (launch theme, status bar)
-         doesn't clash with the always-dark forest theme Compose renders. -->
-    <color name="forest_deep_green">#FF12261C</color>
-    <color name="forest_mid_green">#FF1F4032</color>
+         doesn't clash with the always-dark deep-sea theme Compose renders. -->
+    <color name="deep_sea_blue">#FF0B2733</color>
+    <color name="mid_sea_teal">#FF12475A</color>
     <color name="ember_gold">#FFD9A441</color>
     <color name="bone_white">#FFEDE6D6</color>
 </resources>

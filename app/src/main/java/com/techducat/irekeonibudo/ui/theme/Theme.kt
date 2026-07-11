@@ -7,11 +7,11 @@ import androidx.compose.runtime.Composable
 
 private val IrekeColorScheme = darkColorScheme(
     primary = EmberGold,
-    onPrimary = ForestDeepGreen,
+    onPrimary = DeepSeaBlue,
     secondary = EmberOrange,
-    background = ForestDeepGreen,
+    background = DeepSeaBlue,
     onBackground = BoneWhite,
-    surface = ForestMidGreen,
+    surface = MidSeaTeal,
     onSurface = BoneWhite,
     error = BloodRed,
     tertiary = SpiritViolet

@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.techducat.irekeonibudo.data.Player
 import com.techducat.irekeonibudo.ui.components.PlayerStatusBar
-import com.techducat.irekeonibudo.ui.theme.ForestMidGreen
+import com.techducat.irekeonibudo.ui.theme.MidSeaTeal
 
 @Composable
 fun InventoryScreen(player: Player, onBack: () -> Unit) {
@@ -42,7 +42,7 @@ fun InventoryScreen(player: Player, onBack: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(player.charms) { charm ->
-                    Card(colors = CardDefaults.cardColors(containerColor = ForestMidGreen)) {
+                    Card(colors = CardDefaults.cardColors(containerColor = MidSeaTeal)) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(text = charm.displayName, style = MaterialTheme.typography.titleLarge)
                             Text(text = charm.description, style = MaterialTheme.typography.bodyMedium)

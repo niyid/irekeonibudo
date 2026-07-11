@@ -29,11 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.techducat.irekeonibudo.data.SceneType
 import com.techducat.irekeonibudo.ui.components.SceneCanvas
 import com.techducat.irekeonibudo.ui.theme.AshGrey
+import com.techducat.irekeonibudo.ui.theme.BoneWhite
 import com.techducat.irekeonibudo.ui.theme.EmberGold
 import kotlin.math.sin
 import kotlin.random.Random
@@ -55,8 +57,9 @@ fun TitleScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            SceneCanvas(scene = SceneType.FOREST_PATH)
-            EmberOverlay(modifier = Modifier.matchParentSize())
+            // Open water — the storm that opens Ìrèké's story, not a hunter's forest.
+            SceneCanvas(scene = SceneType.RIVER)
+            BubbleOverlay(modifier = Modifier.matchParentSize())
         }
         Spacer(Modifier.height(24.dp))
         Text(
@@ -86,13 +89,13 @@ fun TitleScreen(
 }
 
 /**
- * A handful of slow-rising embers drifting up over the title illustration.
+ * A handful of slow-rising bubbles drifting up over the title illustration.
  * Purely decorative, purely procedural (no assets) — a fixed seed keeps the
  * particle layout stable across recompositions within a session.
  */
 @Composable
-private fun EmberOverlay(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "embers")
+private fun BubbleOverlay(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "bubbles")
     val phase by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -100,29 +103,38 @@ private fun EmberOverlay(modifier: Modifier = Modifier) {
             animation = tween(durationMillis = 7000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "emberPhase"
+        label = "bubblePhase"
     )
 
     // (horizontal position 0..1, phase offset 0..1, relative size)
-    val embers = remember {
+    val bubbles = remember {
         val rng = Random(42)
-        List(16) { Triple(rng.nextFloat(), rng.nextFloat(), 0.6f + rng.nextFloat() * 0.8f) }
+        List(18) { Triple(rng.nextFloat(), rng.nextFloat(), 0.6f + rng.nextFloat() * 0.8f) }
     }
 
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        embers.forEach { (xFrac, phaseOffset, sizeScale) ->
+        bubbles.forEach { (xFrac, phaseOffset, sizeScale) ->
             val t = (phase + phaseOffset) % 1f
             val y = h * (1f - t)
             val drift = sin((t * 2 * Math.PI).toFloat()) * w * 0.02f
             val x = (w * xFrac + drift).coerceIn(0f, w)
             val alpha = sin((t * Math.PI).toFloat()).coerceIn(0f, 1f)
             drawCircle(
-                color = EmberGold.copy(alpha = alpha * 0.85f),
+                color = BoneWhite.copy(alpha = alpha * 0.55f),
                 radius = 2.5f * sizeScale,
                 center = Offset(x, y)
             )
+            // A faint gold rim catches the light on the larger ones — a small nod to the crown to come.
+            if (sizeScale > 1.1f) {
+                drawCircle(
+                    color = EmberGold.copy(alpha = alpha * 0.25f),
+                    radius = 2.5f * sizeScale + 1.5f,
+                    center = Offset(x, y),
+                    style = Stroke(width = 1f)
+                )
+            }
         }
     }
 }
