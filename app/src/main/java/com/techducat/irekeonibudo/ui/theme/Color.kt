@@ -20,3 +20,12 @@ val SpiritViolet = Color(0xFF5B4B8A)
 
 // A muted coral pink for the sunken court's reef dressing.
 val CoralPink = Color(0xFFE0836F)
+
+// Extra atmosphere tones — stars, foam, moonlight, deep shadow — used to add
+// depth/texture to the procedural illustrations without any imported assets.
+val StarWhite = Color(0xFFFFFDF2)
+val MoonSilver = Color(0xFFC9D6DE)
+val FoamWhite = Color(0xFFEAF6F4)
+val DeepShadow = Color(0xFF060B10)
+val KelpGreen = Color(0xFF1F5B4C)
+val ScaleGreen = Color(0xFF4C7A3F)

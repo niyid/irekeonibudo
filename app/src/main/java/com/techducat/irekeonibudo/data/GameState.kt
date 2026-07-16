@@ -11,7 +11,7 @@ data class GameState(
     val log: List<String> = emptyList()
 ) {
     /** Choices filtered to only those the player currently meets requirements for. */
-    fun availableChoices(): List<Choice> = currentNode.choices.filter { choice ->
+    fun availableChoices(node: StoryNode = currentNode): List<Choice> = node.choices.filter { choice ->
         val meetsStat = choice.requirement?.let { req ->
             when (req.stat) {
                 Stat.IGBOYA -> player.igboya >= req.min

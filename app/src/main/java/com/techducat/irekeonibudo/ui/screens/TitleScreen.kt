@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -28,11 +30,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.techducat.irekeonibudo.data.SceneType
+import com.techducat.irekeonibudo.ui.components.IllustrationFrame
 import com.techducat.irekeonibudo.ui.components.SceneCanvas
 import com.techducat.irekeonibudo.ui.theme.AshGrey
 import com.techducat.irekeonibudo.ui.theme.BoneWhite
@@ -56,10 +60,12 @@ fun TitleScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            // Open water — the storm that opens Ìrèké's story, not a hunter's forest.
-            SceneCanvas(scene = SceneType.RIVER)
-            BubbleOverlay(modifier = Modifier.matchParentSize())
+        IllustrationFrame {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                // Open water — the storm that opens Ìrèké's story, not a hunter's forest.
+                SceneCanvas(scene = SceneType.RIVER)
+                BubbleOverlay(modifier = Modifier.matchParentSize())
+            }
         }
         Spacer(Modifier.height(24.dp))
         Text(
@@ -69,12 +75,23 @@ fun TitleScreen(
             ),
             textAlign = TextAlign.Center
         )
+        Spacer(
+            Modifier
+                .padding(top = 10.dp)
+                .width(56.dp)
+                .height(2.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(EmberGold.copy(alpha = 0f), EmberGold, EmberGold.copy(alpha = 0f))
+                    )
+                )
+        )
         Text(
             text = "From Shipwreck to Crown\nAn Orphan's Journey Through Deep Water and Wisdom",
             style = MaterialTheme.typography.bodyMedium,
             color = AshGrey,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
+            modifier = Modifier.padding(top = 10.dp, bottom = 32.dp)
         )
         Button(onClick = onNewGame, modifier = Modifier.fillMaxWidth(0.8f)) {
             Text("New Journey")
