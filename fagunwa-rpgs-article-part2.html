@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redrawing the Forest: The Audit, the Repaint, and the Copyright Wall</title>
+
+<!-- SEO -->
+<meta name="description" content="Part II: a full audit pass on the Fagunwa Android RPGs, a layered-gradient repaint of SceneCanvas.kt, why Yorùbá copyright law caps how far these can become full animation-adventure games, and why libGDX is next on the bench.">
+<meta name="author" content="niyid">
+<meta name="keywords" content="Yoruba literature, D.O. Fagunwa, Ireke Onibudo, Ogboju Ode, interactive fiction, narrative RPG, Kotlin, Jetpack Compose, Android, Techducat, game design, libGDX, copyright">
+
+<!-- Open Graph (Substack, Facebook, LinkedIn link previews) -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redrawing the Forest: The Audit, the Repaint, and the Copyright Wall">
+<meta property="og:description" content="Part II of the Fagunwa RPG series — an audit pass, a layered-gradient repaint of the shared Canvas renderer, the copyright ceiling on adapting Fagunwa further, and why libGDX is next on the bench.">
+<meta property="og:url" content="https://niyid.github.io/ogbojuode/fagunwa-rpgs-article-part2.html">
+<meta property="og:site_name" content="Techducat">
+<meta property="article:author" content="https://github.com/niyid">
+
+<!-- Twitter/X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Redrawing the Forest: The Audit, the Repaint, and the Copyright Wall">
+<meta name="twitter:description" content="A second pass on two Fagunwa-world Android RPGs — audit, repaint, a copyright ceiling, and libGDX on the horizon.">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://niyid.github.io/ogbojuode/fagunwa-rpgs-article-part2.html">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg:           #080907;
+    --surface:      #0d100c;
+    --panel:        #12160f;
+    --border:       #22271d;
+    --border-hi:    #3a4230;
+    --gold:         #d9a441;
+    --gold-dim:     rgba(217,164,65,0.14);
+    --sea:          #2f7a82;
+    --sea-dim:      rgba(47,122,130,0.14);
+    --forest:       #4a8f63;
+    --forest-dim:   rgba(74,143,99,0.14);
+    --red:          #b3402b;
+    --red-dim:      rgba(179,64,43,0.14);
+    --violet:       #8a76c9;
+    --text:         #e9e4d6;
+    --muted:        #7c8577;
+    --muted-hi:     #b3ae9c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(217,164,65,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(217,164,65,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 28px 96px;
+  }
+
+  .hero { padding: 80px 0 64px; border-bottom: 1px solid var(--border); margin-bottom: 64px; position: relative; }
+
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 28px;
+  }
+  .hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+
+  h1 {
+    font-family: 'Playfair Display', serif; font-size: clamp(36px, 6vw, 66px);
+    font-weight: 900; line-height: 1.06; letter-spacing: -0.02em; margin-bottom: 28px;
+  }
+  h1 .accent { color: var(--gold); }
+  h1 .italic { font-style: italic; }
+
+  .hero-meta {
+    display: flex; align-items: center; gap: 20px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 32px; flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta .sep { color: var(--border-hi); }
+
+  .hero-lead {
+    font-size: 18px; font-weight: 300; color: var(--muted-hi); line-height: 1.7; max-width: 680px;
+    border-left: 3px solid var(--gold); padding-left: 20px;
+  }
+
+  .part-badge {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--gold-dim); border: 1px solid rgba(217,164,65,0.3);
+    border-radius: 20px; padding: 6px 16px 6px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--gold); letter-spacing: 0.05em; margin-bottom: 24px; text-decoration: none;
+  }
+  .part-badge .num { background: var(--gold); color: #14150f; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 10px; }
+
+  .ghost-hero { position: absolute; right: -10px; top: 30px; width: 190px; opacity: 0.08; pointer-events: none; }
+
+  section { margin-bottom: 72px; }
+
+  .section-kicker {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-kicker::after { content: ''; display: block; flex: 1; height: 1px; background: var(--border); }
+
+  h2 {
+    font-family: 'Playfair Display', serif; font-size: clamp(24px, 3.5vw, 36px); font-weight: 700;
+    line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 24px;
+  }
+  h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+
+  p { margin-bottom: 18px; color: var(--muted-hi); }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--text); font-weight: 500; }
+  a { color: var(--gold); }
+
+  .game-badge {
+    display: inline-flex; align-items: center; gap: 6px; border-radius: 4px; padding: 3px 10px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .badge-sea    { background: var(--sea-dim);    color: #6fb3ba; border: 1px solid rgba(47,122,130,0.35); }
+  .badge-forest { background: var(--forest-dim); color: #7fc296; border: 1px solid rgba(74,143,99,0.35); }
+  .badge-red    { background: var(--red-dim);    color: #d97a63; border: 1px solid rgba(179,64,43,0.35); }
+  .badge-violet { background: rgba(138,118,201,0.14); color: var(--violet); border: 1px solid rgba(138,118,201,0.3); }
+
+  .pull-quote {
+    background: var(--gold-dim); border: 1px solid rgba(217,164,65,0.25); border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0; padding: 24px 28px; margin: 32px 0;
+  }
+  .pull-quote p { font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; line-height: 1.6; color: var(--text); margin-bottom: 10px; }
+  .pull-quote cite { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; }
+
+  .thread-divider { margin: 56px 0; text-align: center; }
+  .thread-divider svg { width: 100%; max-width: 560px; height: auto; }
+  .thread-divider-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-top: 10px;
+  }
+
+  .pillars-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+  @media (max-width: 600px) { .pillars-grid { grid-template-columns: 1fr; } }
+
+  .pillar {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 22px 20px;
+    position: relative; overflow: hidden; transition: border-color 0.2s;
+  }
+  .pillar:hover { border-color: var(--border-hi); }
+  .pillar-icon { font-size: 26px; margin-bottom: 12px; display: block; }
+  .pillar-name {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .pillar h3 { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+  .pillar p { font-size: 13px; line-height: 1.6; color: var(--muted); margin: 0; }
+  .pillar-gold    { border-left: 3px solid var(--gold); }
+  .pillar-sea     { border-left: 3px solid var(--sea); }
+  .pillar-forest  { border-left: 3px solid var(--forest); }
+  .pillar-violet  { border-left: 3px solid var(--violet); }
+  .pillar-red     { border-left: 3px solid var(--red); }
+
+  .item-list { display: flex; flex-direction: column; gap: 0; margin: 28px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .item-row { display: grid; grid-template-columns: 160px 1fr; gap: 18px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .item-row:last-child { border-bottom: none; }
+  .item-row:nth-child(odd) { background: rgba(255,255,255,0.012); }
+  .item-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--gold); letter-spacing: 0.03em; }
+  .item-desc { font-size: 13.5px; color: var(--muted-hi); line-height: 1.55; }
+  @media (max-width: 600px) { .item-row { grid-template-columns: 1fr; gap: 4px; } }
+
+  .code-block { background: #060705; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 28px 0; font-size: 13px; }
+  .code-header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .code-header span { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+  .code-header .lang { color: var(--gold); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .code-body { padding: 20px 20px; font-family: 'IBM Plex Mono', monospace; line-height: 1.7; overflow-x: auto; white-space: pre; font-size: 12.5px; }
+  .kw { color: #c792ea; } .fn { color: #82aaff; } .str { color: #c3e88d; } .num { color: #f78c6c; }
+  .cm { color: #5c6a55; font-style: italic; } .ty { color: #ffcb6b; } .prop { color: var(--gold); }
+  .code-header.header-bad .lang { color: #d97a63; }
+  .code-header.header-good .lang { color: #7fc296; }
+
+  .flow-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px 28px; margin: 32px 0; }
+  .diagram-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .flow-steps-list { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+  .flow-step { display: grid; grid-template-columns: 40px 1fr; gap: 16px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-step-num {
+    width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .step-gold   { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(217,164,65,0.3); }
+  .step-sea    { background: var(--sea-dim);    color: #6fb3ba;       border: 1px solid rgba(47,122,130,0.3); }
+  .step-forest { background: var(--forest-dim); color: #7fc296;       border: 1px solid rgba(74,143,99,0.3); }
+  .step-red    { background: var(--red-dim);    color: #d97a63;      border: 1px solid rgba(179,64,43,0.3); }
+  .step-violet { background: rgba(138,118,201,0.14); color: var(--violet); border: 1px solid rgba(138,118,201,0.3); }
+  .flow-step-content strong { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .flow-step-content p { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.55; }
+
+  .compare-cards { display: flex; flex-direction: column; gap: 0; margin: 28px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .compare-header { display: grid; grid-template-columns: 150px 1fr 1fr; background: var(--panel); border-bottom: 2px solid var(--border-hi); }
+  .compare-header-cell { padding: 12px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .compare-header-cell:nth-child(1) { color: var(--muted); }
+  .compare-header-cell:nth-child(2) { color: #d97a63; border-left: 1px solid var(--border); }
+  .compare-header-cell:nth-child(3) { color: #7fc296; border-left: 1px solid var(--border); }
+  .compare-row { display: grid; grid-template-columns: 150px 1fr 1fr; border-bottom: 1px solid var(--border); }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row:hover { background: rgba(255,255,255,0.016); }
+  .compare-cell { padding: 14px 16px; font-size: 13.5px; line-height: 1.5; }
+  .compare-cell:nth-child(2), .compare-cell:nth-child(3) { border-left: 1px solid var(--border); }
+  .compare-cell.dim-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 580px) {
+    .compare-header { grid-template-columns: 1fr; }
+    .compare-header-cell:nth-child(1) { display: none; }
+    .compare-header-cell:nth-child(2), .compare-header-cell:nth-child(3) { border-left: none; border-top: 1px solid var(--border); }
+    .compare-row { grid-template-columns: 1fr; }
+    .compare-cell.dim-label { background: var(--panel); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 16px 4px; }
+    .compare-cell:nth-child(2), .compare-cell:nth-child(3) { border-left: none; padding-top: 6px; padding-bottom: 6px; }
+    .compare-cell:nth-child(3) { padding-bottom: 14px; }
+  }
+
+  .tech-stack { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+  .tech-pill {
+    display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--muted-hi); letter-spacing: 0.05em; transition: border-color 0.2s, color 0.2s;
+  }
+  .tech-pill:hover { border-color: var(--border-hi); color: var(--text); }
+  .tech-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-gold { background: var(--gold); } .dot-sea { background: var(--sea); } .dot-forest { background: var(--forest); } .dot-violet { background: var(--violet); } .dot-red { background: var(--red); }
+
+  .callout { border-radius: 8px; padding: 18px 20px; margin: 24px 0; display: flex; gap: 14px; align-items: flex-start; }
+  .callout-warn { background: var(--red-dim); border: 1px solid rgba(179,64,43,0.25); }
+  .callout-info { background: var(--sea-dim); border: 1px solid rgba(47,122,130,0.25); }
+  .callout-good { background: var(--gold-dim); border: 1px solid rgba(217,164,65,0.25); }
+  .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body p { font-size: 13.5px; margin: 0; line-height: 1.6; }
+  .callout-body strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+  .article-footer { border-top: 1px solid var(--border); padding-top: 40px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+  .footer-left p { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; margin: 0 0 6px; }
+  .footer-links { display: flex; gap: 12px; flex-wrap: wrap; }
+  .footer-link {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--gold-dim); border: 1px solid rgba(217,164,65,0.3);
+    border-radius: 6px; padding: 10px 18px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--gold);
+    text-decoration: none; letter-spacing: 0.08em; transition: background 0.2s;
+  }
+  .footer-link:hover { background: rgba(217,164,65,0.22); }
+
+  @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .hero { animation: fadeSlideUp 0.7s ease both; }
+  section { animation: fadeSlideUp 0.6s ease both; }
+
+  @media (max-width: 600px) {
+    .container { padding: 0 16px 64px; }
+    .hero { padding: 48px 0 40px; }
+    .ghost-hero { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero">
+    <a class="part-badge" href="https://niyid.github.io/irekeonibudo/fagunwa-rpgs-article.html" target="_blank"><span class="num">1</span> Read Part I first — Water and Wood →</a>
+    <div class="hero-eyebrow">Audit · Repaint · Copyright · Roadmap</div>
+
+    <h1>
+      <span class="italic accent">Redrawing</span> the Forest:<br>
+      The Audit, the <span class="accent">Repaint</span>,<br>
+      and the Wall Ahead
+    </h1>
+
+    <div class="hero-meta">
+      <span>📅 July 2026</span>
+      <span class="sep">·</span>
+      <span>🔗 github.com/niyid/irekeonibudo · github.com/niyid/ogbojuode</span>
+      <span class="sep">·</span>
+      <span>📱 Android · Kotlin · Jetpack Compose</span>
+      <span class="sep">·</span>
+      <span>⏱ 11 min read</span>
+    </div>
+
+    <p class="hero-lead">
+      Part I described the engine both Fagunwa-world games share. This is what happened after it shipped: a
+      full audit pass on <strong>Akara-ogun's Journey Through Igbo Irúnmọlẹ̀</strong> that turned up dead code,
+      theme mismatches, and combat that didn't balance the way the numbers implied — followed by a ground-up
+      repaint of the shared Canvas renderer. It's also where we stop and ask how much further either game can
+      honestly go before Fagunwa's own copyright, not the engine, becomes the limiting factor.
+    </p>
+
+    <svg class="ghost-hero" viewBox="0 0 160 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 20 Q 90 20 100 60 Q 110 100 80 120 Q 50 140 60 170" stroke="#d9a441" stroke-width="3" fill="none" opacity="0.6"/>
+      <circle cx="100" cy="60" r="18" fill="none" stroke="#4a8f63" stroke-width="2" opacity="0.5"/>
+      <circle cx="100" cy="60" r="4" fill="#d9a441" opacity="0.7"/>
+    </svg>
+  </header>
+
+  <!-- ═══ WHERE WE LEFT OFF ═══ -->
+  <section>
+    <div class="section-kicker">Recap</div>
+    <h2>Where Part I Left Off</h2>
+    <p>
+      The first article covered two separate Android projects — <strong>Ìrèké Oníbùdó</strong> and
+      <strong>Akara-ogun's Journey Through Igbo Irúnmọlẹ̀</strong> — running on one shared spine: Kotlin,
+      Jetpack Compose, Room, a single <code>GameViewModel</code>, and a Canvas-based <code>SceneCanvas</code>
+      that drew every illustration procedurally, with no imported art in either app. That architecture hasn't
+      changed. What changed is everything sitting on top of it, starting with a line-by-line audit of the
+      younger of the two projects, Akara-ogun, which had shipped fast enough to accumulate the usual residue:
+      a scene type drawn with the wrong palette, combat math that read fine in isolation but broke under
+      certain stat combinations, and a scattering of dead code left behind by earlier refactors.
+    </p>
+  </section>
+
+  <!-- ═══ THE SECOND PASS ═══ -->
+  <section>
+    <div class="section-kicker">The Second Pass</div>
+    <h2>What a Full Audit Actually Turns Up</h2>
+    <p>
+      None of these were dramatic bugs — the game ran, saved, and resolved every ending correctly before the
+      audit too. What an audit pass catches is the gap between what the code intends and what it actually does,
+      which is a quieter kind of bug and a more persistent one:
+    </p>
+
+    <div class="pillars-grid">
+      <div class="pillar pillar-red">
+        <span class="pillar-icon">🎭</span>
+        <div class="pillar-name">Found</div>
+        <h3>Theme Mismatches</h3>
+        <p>A couple of <code>SceneType.SPIRIT_COURT</code> nodes were still rendering with the earlier village
+        palette from before the forest-court scenes existed — cosmetically wrong, easy to miss in a quick
+        playtest, obvious once you're staring at 41 nodes end to end.</p>
+      </div>
+      <div class="pillar pillar-gold">
+        <span class="pillar-icon">🧹</span>
+        <div class="pillar-name">Found</div>
+        <h3>Dead Code</h3>
+        <p>An earlier combat-flow refactor had left a superseded damage-roll path unreachable but still compiling
+        — no functional impact, but exactly the kind of thing that makes the next contributor debug the wrong
+        function.</p>
+      </div>
+      <div class="pillar pillar-sea">
+        <span class="pillar-icon">⚔️</span>
+        <div class="pillar-name">Found</div>
+        <h3>Combat Balance Drift</h3>
+        <p>At very high Ògùn, enemy hit chance could round down far enough that certain fights became
+        near-unlosable — the floor described in Part I's constants table didn't exist yet when this run was
+        made; it was added as a direct result of this audit.</p>
+      </div>
+      <div class="pillar pillar-forest">
+        <span class="pillar-icon">🐛</span>
+        <div class="pillar-name">Found</div>
+        <h3>Edge-Case Bugs</h3>
+        <p>A handful of choices with stat-gate conditions were evaluated against the player's stat <em>before</em>
+        an effect from the same node had applied, occasionally letting a gate pass or fail one point earlier
+        than the story intended.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-good">
+      <span class="callout-icon">✅</span>
+      <div class="callout-body">
+        <strong>Zero crashes was the bar, not the ceiling</strong>
+        <p>The acceptance criterion for the pass wasn't "doesn't crash" — it was every one of the above fixed in
+        one sweep, with the constants table you saw in Part I (including the <code>ENEMY_MIN_HIT_CHANCE</code>
+        floor) as the direct output of the combat-balance findings.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="thread-divider">
+    <svg viewBox="0 0 560 90" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 45 L 100 45" stroke="#22271d" stroke-width="2" stroke-dasharray="2 6" opacity="0.9"/>
+      <circle cx="140" cy="45" r="5" fill="#d9a441" opacity="0.8"/>
+      <path d="M180 45 C 220 20, 260 70, 300 45 C 340 20, 380 70, 420 45" stroke="#4a8f63" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M420 45 L 560 45" stroke="#22271d" stroke-width="2" stroke-dasharray="2 6" opacity="0.9"/>
+    </svg>
+    <div class="thread-divider-label">Audit findings become paint</div>
+  </div>
+
+  <!-- ═══ SCENECANVAS BEFORE/AFTER ═══ -->
+  <section>
+    <div class="section-kicker">Visual Overhaul</div>
+    <h2>SceneCanvas, Redrawn</h2>
+    <p>
+      The audit's cosmetic findings became the excuse for a bigger repaint. The original <code>SceneCanvas</code>
+      drew each scene as flat, single-tone shapes on a solid background — functional, readable, and honestly
+      a little flat next to the writing. The rework keeps every constraint from Part I (still no imported art,
+      still pure Canvas primitives, still keyed off the same seven-value <code>SceneType</code> enum) but layers
+      each scene with a background-to-foreground gradient wash, soft radial glow behind light sources and spirit
+      figures, and a faint fog gradient over distant elements to fake depth on a 2D canvas.
+    </p>
+
+    <div class="compare-cards">
+      <div class="compare-header">
+        <div class="compare-header-cell">Dimension</div>
+        <div class="compare-header-cell">v1 — Original</div>
+        <div class="compare-header-cell">v2 — Repainted</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Fills</div>
+        <div class="compare-cell">Single flat color per shape</div>
+        <div class="compare-cell">Layered linear/radial gradients per shape</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Light sources</div>
+        <div class="compare-cell">None — shapes read as silhouettes</div>
+        <div class="compare-cell">Soft radial glow around torches, eyes, charms, court braziers</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Depth</div>
+        <div class="compare-cell">Foreground and background share one flat plane</div>
+        <div class="compare-cell">Fog-gradient overlay recedes distant tree lines and cave walls</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Palette use</div>
+        <div class="compare-cell">Palette applied per shape, uniformly</div>
+        <div class="compare-cell">Palette blended across gradient stops for atmosphere per <code>SceneType</code></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Draw cost</div>
+        <div class="compare-cell">Cheap — flat fills only</div>
+        <div class="compare-cell">Still fully procedural, more paint objects per frame, no measurable jank on target devices</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell dim-label">Assets required</div>
+        <div class="compare-cell">None</div>
+        <div class="compare-cell">None — still zero imported art in either app</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header header-bad"><span>SceneCanvas.kt — v1, flat fill</span><span class="lang">Before</span></div>
+      <div class="code-body"><span class="kw">fun</span> <span class="fn">drawSpiritFigure</span>(canvas: DrawScope, x: <span class="ty">Float</span>, y: <span class="ty">Float</span>) {
+    canvas.<span class="fn">drawCircle</span>(
+        color = <span class="ty">Color</span>(<span class="num">0xFF2E3B24</span>),
+        radius = <span class="num">40f</span>,
+        center = <span class="ty">Offset</span>(x, y)
+    )
+}</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header header-good"><span>SceneCanvas.kt — v2, layered gradient + glow</span><span class="lang">After</span></div>
+      <div class="code-body"><span class="kw">fun</span> <span class="fn">drawSpiritFigure</span>(canvas: DrawScope, x: <span class="ty">Float</span>, y: <span class="ty">Float</span>) {
+    <span class="cm">// atmospheric glow, drawn first and beneath the figure</span>
+    canvas.<span class="fn">drawCircle</span>(
+        brush = <span class="ty">Brush</span>.<span class="fn">radialGradient</span>(
+            colors = listOf(GlowColor.<span class="fn">copy</span>(alpha = <span class="num">0.35f</span>), <span class="ty">Color</span>.Transparent)
+        ),
+        radius = <span class="num">90f</span>,
+        center = <span class="ty">Offset</span>(x, y)
+    )
+    <span class="cm">// figure itself, now a top-to-bottom gradient instead of one flat tone</span>
+    canvas.<span class="fn">drawCircle</span>(
+        brush = <span class="ty">Brush</span>.<span class="fn">verticalGradient</span>(
+            colors = listOf(FigureHighlight, FigureBase, FigureShadow)
+        ),
+        radius = <span class="num">40f</span>,
+        center = <span class="ty">Offset</span>(x, y)
+    )
+}</div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">🎨</span>
+      <div class="callout-body">
+        <strong>Same constraint, more paint</strong>
+        <p>Every gradient stop and glow color still comes from the same per-game palette described in Part I —
+        sea blues and coral for Ìrèké, forest greens for Akara-ogun. The repaint adds depth to that palette; it
+        doesn't replace it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ COPYRIGHT CEILING ═══ -->
+  <section>
+    <div class="section-kicker">The Wall Ahead</div>
+    <h2>Why This Doesn't Become a Full Animation-Adventure Game</h2>
+    <p>
+      Every repaint pass raises the same question: what if these became full animated adventure games — sprite
+      animation, cutscenes, voice, the works? The honest answer is that <em>copyright</em>, not engineering
+      effort, is the ceiling on how far either project can go.
+    </p>
+    <p>
+      D.O. Fagunwa died on 7 December 1963. Under Nigeria's Copyright Act, literary works are protected for the
+      life of the author plus 70 years — which puts <em>Ògbójú Ọdẹ nínú Igbó Irúnmọlẹ̀</em> (1938) and
+      <em>Ìrèké Oníbùdó</em> (1949) under copyright in Nigeria into the early 2030s. Wole Soyinka's 1968 English
+      translation, <em>The Forest of a Thousand Daemons</em>, carries its own separate copyright as a distinct
+      translated work, independent of the original Yorùbá text's term. Neither book is in the public domain yet,
+      in Nigeria or in most jurisdictions with a similar life-plus-70 rule.
+    </p>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚖️</span>
+      <div class="callout-body">
+        <strong>Not legal advice — just the reasoning behind a design choice</strong>
+        <p>This isn't a legal opinion, and copyright questions like fair dealing, transformative use, and
+        estate permissions are genuinely fact-specific. What follows is simply why both projects have stayed
+        conservative rather than an assessment of what would or wouldn't be permitted.</p>
+      </div>
+    </div>
+
+    <p>
+      Both apps already sit deliberately close to the safe end of that line: they reuse Fagunwa's world and
+      character names — public facts about published books, not protected expression — while every scene, line
+      of dialogue, and story branch is original writing, with no text lifted from either novel or Soyinka's
+      translation. That's a comfortable place to stand. Turning either app into something closer to a full
+      animated adaptation — cutscenes built around specific published scenes, character designs matched to
+      known illustrated editions, marketing that leans on the books' titles and cover art — moves away from
+      "inspired by the world" and toward "derivative of the specific work," which is exactly the territory
+      copyright law is built to gate until the term expires or an estate grants rights. Until Fagunwa's Yorùbá
+      originals age into the public domain, or a license is arranged with his estate, both games are staying
+      exactly where Part I described them: original interactive fiction borrowing a setting, not adaptations of
+      the novels themselves.
+    </p>
+  </section>
+
+  <div class="thread-divider">
+    <svg viewBox="0 0 560 90" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 55 C 60 30, 100 70, 160 45" stroke="#8a76c9" stroke-width="2.5" fill="none" opacity="0.8"/>
+      <path d="M160 45 C 220 20, 260 70, 320 45 C 380 20, 420 70, 480 45" stroke="#d9a441" stroke-width="2" fill="none" opacity="0.7"/>
+      <path d="M480 45 L 560 45" stroke="#22271d" stroke-width="2" stroke-dasharray="2 6" opacity="0.9"/>
+    </svg>
+    <div class="thread-divider-label">Staying inside the line — and looking at what's still possible inside it</div>
+  </div>
+
+  <!-- ═══ WHAT'S NEXT: LIBGDX ═══ -->
+  <section>
+    <div class="section-kicker">Next Iteration</div>
+    <h2>What We're Testing Next: libGDX and the Bench Beyond Canvas</h2>
+    <p>
+      None of that copyright ceiling stops the engine itself from getting more ambitious inside the bounds both
+      games already respect — richer motion, particle effects for charm invocations, parallax scene transitions.
+      Jetpack Compose's <code>Canvas</code> can do a lot of that, but it starts fighting the framework once you
+      want true sprite-sheet animation, a scene graph, or a particle system rather than hand-rolled gradients.
+      The next iteration is evaluating a small set of alternatives before committing to one:
+    </p>
+
+    <div class="tech-stack">
+      <span class="tech-pill"><span class="dot dot-red"></span> libGDX (Java/Kotlin, LibGDX scene2d + particle editor)</span>
+      <span class="tech-pill"><span class="dot dot-violet"></span> KorGE (Kotlin-native, multiplatform)</span>
+      <span class="tech-pill"><span class="dot dot-sea"></span> Godot + Kotlin/Android bindings</span>
+      <span class="tech-pill"><span class="dot dot-forest"></span> Compose Canvas, extended (status quo)</span>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar pillar-red">
+        <span class="pillar-icon">🕹️</span>
+        <div class="pillar-name">Candidate</div>
+        <h3>libGDX</h3>
+        <p>Mature, battle-tested 2D engine with a real scene graph, sprite-sheet animation, and a built-in
+        particle editor for charm effects. Biggest lift to integrate into an existing Compose app — it wants its
+        own <code>GLSurfaceView</code>-style render target — but the ceiling on what's animatable is much higher.</p>
+      </div>
+      <div class="pillar pillar-violet">
+        <span class="pillar-icon">🧵</span>
+        <div class="pillar-name">Candidate</div>
+        <h3>KorGE</h3>
+        <p>Kotlin-native and multiplatform like the rest of the Techducat stack, with a lighter footprint than
+        libGDX. Smaller community and fewer battle-tested examples, but a more natural fit for a codebase that's
+        deliberately avoided Java-first tooling everywhere else.</p>
+      </div>
+      <div class="pillar pillar-sea">
+        <span class="pillar-icon">🌐</span>
+        <div class="pillar-name">Candidate</div>
+        <h3>Godot + Kotlin bindings</h3>
+        <p>The most full-featured option — a real editor, animation timeline, and shader support — at the cost
+        of the biggest architectural detour from "one Kotlin/Compose Android app" toward "an embedded game
+        engine with an Android host."</p>
+      </div>
+      <div class="pillar pillar-forest">
+        <span class="pillar-icon">🖌️</span>
+        <div class="pillar-name">Baseline</div>
+        <h3>Compose Canvas, extended</h3>
+        <p>Zero migration cost and everything documented in this article already runs on it. The likely outcome
+        is that Canvas stays the renderer for narrative scenes, with libGDX or KorGE tried specifically for
+        combat-encounter animation, where a real sprite/particle pipeline earns its complexity.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">🧪</span>
+      <div class="callout-body">
+        <strong>Evaluation, not a rewrite commitment</strong>
+        <p>Nothing here replaces the current architecture yet. The plan is a small, isolated spike — one combat
+        encounter re-rendered in libGDX behind a feature flag — before any decision about adopting it across
+        either game.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CONCLUSION ═══ -->
+  <section>
+    <div class="section-kicker">Conclusion</div>
+    <h2>The Repaint Was the Easy Part</h2>
+    <p>
+      Fixing a palette mismatch, deleting dead code, and adding a hit-chance floor are the kind of changes that
+      show up cleanly in a diff. Deciding how far a piece of original interactive fiction can lean on a
+      still-copyrighted novel's world before it stops being original is the harder, less code-shaped problem —
+      and it's the one that actually sets the boundary on what "Fagunwa RPG, v3" is allowed to look like.
+      Everything else — layered gradients, a real particle system, a libGDX-powered combat scene — is just
+      craft, and craft is the part that's still fully in our hands.
+    </p>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="article-footer">
+    <div class="footer-left">
+      <p>Both projects remain open source — Kotlin, Jetpack Compose, no external art or paywalled assets.</p>
+      <p>github.com/niyid/irekeonibudo · github.com/niyid/ogbojuode</p>
+    </div>
+    <div class="footer-links">
+      <a class="footer-link" href="https://niyid.github.io/irekeonibudo/fagunwa-rpgs-article.html" target="_blank">← Part I: Water and Wood</a>
+      <a class="footer-link" href="https://github.com/niyid/ogbojuode" target="_blank">🌳 Akara-ogun →</a>
+      <a class="footer-link" href="https://github.com/niyid/irekeonibudo" target="_blank">🌊 Ìrèké Oníbùdó →</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
