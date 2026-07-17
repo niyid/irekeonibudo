@@ -17,7 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.techducat.irekeonibudo.R
 import com.techducat.irekeonibudo.data.Choice
 import com.techducat.irekeonibudo.data.GameState
 import com.techducat.irekeonibudo.ui.components.AppBackground
@@ -56,21 +58,21 @@ fun StoryScreen(
                         SceneCanvas(scene = node.scene)
                     }
                     Text(
-                        text = node.title,
+                        text = stringResource(node.titleRes),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             shadow = Shadow(color = EmberGold.copy(alpha = 0.25f), offset = Offset(0f, 0f), blurRadius = 16f)
                         ),
                         modifier = Modifier.padding(top = 18.dp, bottom = 8.dp)
                     )
                     Text(
-                        text = node.text,
+                        text = stringResource(node.textRes),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
                     state.availableChoices(node).forEach { choice ->
-                        ChoiceButton(text = choice.text, onClick = { onChoice(choice) })
+                        ChoiceButton(text = stringResource(choice.textRes), onClick = { onChoice(choice) })
                     }
-                    ChoiceButton(text = "🎒  Inventory", onClick = onOpenInventory)
+                    ChoiceButton(text = stringResource(R.string.story_choice_inventory), onClick = onOpenInventory)
                 }
             }
         }

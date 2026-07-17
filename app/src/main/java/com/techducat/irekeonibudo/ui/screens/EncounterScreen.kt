@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,14 +34,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.techducat.irekeonibudo.R
 import com.techducat.irekeonibudo.data.AttackType
 import com.techducat.irekeonibudo.data.Charm
 import com.techducat.irekeonibudo.data.CreaturePhase
 import com.techducat.irekeonibudo.data.DodgeDirection
+import com.techducat.irekeonibudo.data.DuelLogEvent
 import com.techducat.irekeonibudo.data.DuelState
 import com.techducat.irekeonibudo.data.GameState
 import com.techducat.irekeonibudo.data.PlayerActionState
@@ -115,19 +117,19 @@ fun EncounterScreen(
                 }
 
                 Text(
-                    text = duel.creature.name,
+                    text = stringResource(duel.creature.nameRes),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         shadow = Shadow(color = BloodRed.copy(alpha = 0.35f), offset = Offset(0f, 0f), blurRadius = 18f)
                     ),
                     modifier = Modifier.padding(top = 14.dp)
                 )
                 Text(
-                    text = duel.creature.description,
+                    text = stringResource(duel.creature.descriptionRes),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 4.dp, bottom = 10.dp)
                 )
                 StatBar(
-                    label = duel.creature.name,
+                    label = stringResource(duel.creature.nameRes),
                     value = duel.creatureHealth,
                     max = duel.creature.maxHealth,
                     color = BloodRed,
@@ -148,9 +150,9 @@ fun EncounterScreen(
                         .padding(8.dp)
                 ) {
                     LazyColumn(state = logState, modifier = Modifier.fillMaxSize()) {
-                        items(duel.roundLog.takeLast(20)) { line ->
+                        items(duel.roundLog.takeLast(20)) { event ->
                             Text(
-                                text = line,
+                                text = duelLogText(event, stringResource(duel.creature.nameRes)),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = BoneWhite.copy(alpha = 0.9f),
                                 modifier = Modifier.padding(vertical = 1.dp)
@@ -207,7 +209,7 @@ fun EncounterScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "swipe to dodge · hold to block · tap to strike",
+                        text = stringResource(R.string.duel_gesture_hint),
                         style = MaterialTheme.typography.labelMedium,
                         color = BoneWhite.copy(alpha = 0.55f)
                     )
@@ -233,7 +235,7 @@ private fun CharmRow(
             .fillMaxWidth()
             .padding(bottom = 10.dp)
     ) {
-        OutlinedButton(onClick = onFlee, modifier = Modifier.weight(1f)) { Text("Flee") }
+        OutlinedButton(onClick = onFlee, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.duel_flee)) }
         charms.filter { it != Charm.ADEORUN_TOKEN }.forEach { charm ->
             val onCooldown = duel.elapsedMs < (duel.charmCooldowns[charm] ?: 0L)
             val costsOogun = charm != Charm.HEALING_LEAF && !(charm == Charm.INNER_EYE && duel.weakPointFound)
@@ -244,7 +246,7 @@ private fun CharmRow(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = SpiritViolet),
                 modifier = Modifier.weight(1.4f)
             ) {
-                Text(charm.displayName, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                Text(stringResource(charm.displayNameRes), style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         }
     }
@@ -347,6 +349,55 @@ private fun telegraphColor(type: AttackType?): Color = when (type) {
     AttackType.OVERHEAD -> BloodRed
     AttackType.LUNGE -> SpiritViolet
     null -> BoneWhite
+}
+
+/**
+ * Resolves a structured [DuelLogEvent] into localized display text. Kept at
+ * the UI layer (rather than in DuelEngine, which has no Android Context) so
+ * the combat log is localizable the same way the rest of the game's text is.
+ */
+@Composable
+private fun duelLogText(event: DuelLogEvent, creatureName: String): String {
+    val base = when (event) {
+        is DuelLogEvent.CreatureSizesUp -> stringResource(R.string.duel_log_creature_sizes_up, creatureName)
+        is DuelLogEvent.Telegraph -> when (event.type) {
+            AttackType.LEFT_SWING -> stringResource(R.string.duel_log_telegraph_left_swing, creatureName)
+            AttackType.RIGHT_SWING -> stringResource(R.string.duel_log_telegraph_right_swing, creatureName)
+            AttackType.OVERHEAD -> stringResource(R.string.duel_log_telegraph_overhead, creatureName)
+            AttackType.LUNGE -> stringResource(R.string.duel_log_telegraph_lunge, creatureName)
+        }
+        is DuelLogEvent.PerfectDodge -> when (event.type) {
+            AttackType.LEFT_SWING, AttackType.RIGHT_SWING -> stringResource(R.string.duel_log_perfect_dodge_swing, creatureName)
+            AttackType.LUNGE -> stringResource(R.string.duel_log_perfect_dodge_lunge, creatureName)
+            AttackType.OVERHEAD -> stringResource(R.string.duel_log_perfect_dodge_overhead, creatureName)
+        }
+        is DuelLogEvent.BlockedHit -> stringResource(R.string.duel_log_blocked_hit, creatureName, event.damage)
+        is DuelLogEvent.PartialDodge -> stringResource(R.string.duel_log_partial_dodge, event.damage)
+        is DuelLogEvent.PartialBlock -> stringResource(R.string.duel_log_partial_block, event.damage)
+        is DuelLogEvent.FlatFooted -> stringResource(R.string.duel_log_flat_footed, creatureName, event.damage)
+        is DuelLogEvent.WrongRead -> stringResource(R.string.duel_log_wrong_read, creatureName, event.damage)
+        is DuelLogEvent.StrengthGivesOut -> stringResource(R.string.duel_log_strength_gives_out)
+        is DuelLogEvent.StaggerHit -> stringResource(R.string.duel_log_stagger_hit, creatureName, event.damage)
+        is DuelLogEvent.RecoverHit -> stringResource(R.string.duel_log_recover_hit, creatureName, event.damage)
+        is DuelLogEvent.NormalHit -> stringResource(R.string.duel_log_normal_hit, creatureName, event.damage)
+        is DuelLogEvent.FleeSuccess -> stringResource(R.string.duel_log_flee_success, creatureName)
+        is DuelLogEvent.FleeBlocked -> stringResource(R.string.duel_log_flee_blocked, creatureName)
+        is DuelLogEvent.LeafHeal -> stringResource(R.string.duel_log_leaf_heal, event.healed)
+        is DuelLogEvent.SandShield -> stringResource(R.string.duel_log_sand_shield)
+        is DuelLogEvent.EyeOpens -> stringResource(R.string.duel_log_eye_opens, creatureName)
+        is DuelLogEvent.CowrieHit -> stringResource(R.string.duel_log_cowrie_hit, event.damage)
+        is DuelLogEvent.CowrieMiss -> stringResource(R.string.duel_log_cowrie_miss)
+        is DuelLogEvent.None -> ""
+    }
+    val shielded = when (event) {
+        is DuelLogEvent.BlockedHit -> event.shielded
+        is DuelLogEvent.PartialDodge -> event.shielded
+        is DuelLogEvent.PartialBlock -> event.shielded
+        is DuelLogEvent.FlatFooted -> event.shielded
+        is DuelLogEvent.WrongRead -> event.shielded
+        else -> false
+    }
+    return if (shielded) base + stringResource(R.string.duel_log_shield_soften_suffix) else base
 }
 
 private const val DuelStartupMs = 140

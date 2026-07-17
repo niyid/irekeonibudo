@@ -13,6 +13,37 @@ enum class CreaturePhase { IDLE, TELEGRAPH, STRIKE, RECOVER, STAGGERED, DEFEATED
 enum class PlayerActionState { NEUTRAL, DODGE_STARTUP, DODGE_ACTIVE, DODGE_RECOVER, BLOCKING, ATTACK_STARTUP, ATTACK_ACTIVE, ATTACK_RECOVER, STAGGERED }
 
 /**
+ * A single line of the duel round log, as structured facts rather than
+ * pre-rendered text. [com.techducat.irekeonibudo.engine.DuelEngine] is a
+ * plain Kotlin class with no Android dependency (kept unit-testable without
+ * Android), so it can't call getString() itself — the UI layer resolves each
+ * event to localized display text via string resources (see EncounterScreen).
+ */
+sealed class DuelLogEvent {
+    data object CreatureSizesUp : DuelLogEvent()
+    data class Telegraph(val type: AttackType) : DuelLogEvent()
+    data class PerfectDodge(val type: AttackType) : DuelLogEvent()
+    data class BlockedHit(val damage: Int, val shielded: Boolean = false) : DuelLogEvent()
+    data class PartialDodge(val damage: Int, val shielded: Boolean = false) : DuelLogEvent()
+    data class PartialBlock(val damage: Int, val shielded: Boolean = false) : DuelLogEvent()
+    data class FlatFooted(val damage: Int, val shielded: Boolean = false) : DuelLogEvent()
+    data class WrongRead(val damage: Int, val shielded: Boolean = false) : DuelLogEvent()
+    data object StrengthGivesOut : DuelLogEvent()
+    data class StaggerHit(val damage: Int) : DuelLogEvent()
+    data class RecoverHit(val damage: Int) : DuelLogEvent()
+    data class NormalHit(val damage: Int) : DuelLogEvent()
+    data object FleeSuccess : DuelLogEvent()
+    data object FleeBlocked : DuelLogEvent()
+    data class LeafHeal(val healed: Int) : DuelLogEvent()
+    data object SandShield : DuelLogEvent()
+    data object EyeOpens : DuelLogEvent()
+    data class CowrieHit(val damage: Int) : DuelLogEvent()
+    data object CowrieMiss : DuelLogEvent()
+    /** Should never actually surface in the log — guards the (unreachable) missing-telegraph case. */
+    data object None : DuelLogEvent()
+}
+
+/**
  * Real-time duel state, ticked every frame by [com.techducat.irekeonibudo.engine.DuelEngine].
  * Replaces the old turn-based EncounterState — combat here resolves from timing/positioning,
  * not RNG hit-chance rolls.
@@ -32,7 +63,7 @@ data class DuelState(
     val weakPointFound: Boolean = false,
 
     val comboCount: Int = 0,
-    val roundLog: List<String> = emptyList(),
+    val roundLog: List<DuelLogEvent> = emptyList(),
     val outcome: DuelOutcome? = null,
 
     /** Wall-clock cooldown gates (ms since duel start) per charm, keyed by name to avoid a map-of-enum headache in UI diffing. */

@@ -1,5 +1,7 @@
 package com.techducat.irekeonibudo.data
 
+import androidx.annotation.StringRes
+
 /** Which stat a requirement or effect is expressed against. */
 enum class Stat { IGBOYA, OOGUN, ILERA }
 
@@ -17,12 +19,15 @@ enum class SceneType { VILLAGE, FOREST_PATH, RIVER, CAVE, SPIRIT_COURT, VICTORY,
  *  - narrative, with a list of [choices] the player picks from, or
  *  - an encounter, in which case [encounterId] points at a [Creature] and the
  *    game hands control to the EncounterScreen instead of rendering choices.
+ *
+ * [titleRes]/[textRes] are string resource ids rather than raw text, so the
+ * narrative is localizable via strings.xml without touching this data.
  */
 data class StoryNode(
     val id: String,
-    val title: String,
+    @StringRes val titleRes: Int,
     val scene: SceneType,
-    val text: String,
+    @StringRes val textRes: Int,
     val choices: List<Choice> = emptyList(),
     val encounterId: String? = null,
     val grantsCharm: Charm? = null,
@@ -30,7 +35,7 @@ data class StoryNode(
 )
 
 data class Choice(
-    val text: String,
+    @StringRes val textRes: Int,
     val nextNodeId: String,
     val requirement: Requirement? = null,
     val requiresCharm: Charm? = null,
@@ -42,8 +47,8 @@ data class Choice(
 /** A creature or trial encountered on the journey, fought in real time via DuelScreen/DuelEngine. */
 data class Creature(
     val id: String,
-    val name: String,
-    val description: String,
+    @StringRes val nameRes: Int,
+    @StringRes val descriptionRes: Int,
     val maxHealth: Int,
     val attackPower: Int,
     val victoryNodeId: String,

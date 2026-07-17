@@ -1,3 +1,335 @@
 <resources>
     <string name="app_name">Ìrèké Oníbùdó</string>
+
+    <!-- Title screen -->
+    <string name="title_screen_heading">ÌRÈKÉ ONÍBÙDÓ</string>
+    <string name="title_screen_tagline">From Shipwreck to Crown\nAn Orphan\'s Journey Through Deep Water and Wisdom</string>
+    <string name="title_screen_new_journey">New Journey</string>
+    <string name="title_screen_continue">Continue</string>
+
+    <!-- Story screen -->
+    <string name="story_choice_inventory">🎒  Inventory</string>
+
+    <!-- Inventory screen -->
+    <string name="inventory_heading">Charms Gathered</string>
+    <string name="inventory_empty_state">You carry nothing but the clothes on your back.</string>
+    <string name="action_back">Back</string>
+
+    <!-- Encounter screen -->
+    <string name="duel_gesture_hint">swipe to dodge · hold to block · tap to strike</string>
+    <string name="duel_flee">Flee</string>
+
+    <!-- Ending screen -->
+    <string name="ending_new_journey">Begin a New Journey</string>
+
+    <!-- Player status bar -->
+    <string name="stat_label_igboya">Ìgboyà</string>
+    <string name="stat_label_oogun">Oògùn</string>
+    <string name="stat_label_ilera">Ìlera</string>
+
+    <!-- Stat bar -->
+    <string name="stat_value_over_max">%1$d/%2$d</string>
+
+    <!-- Charms -->
+    <string name="charm_mother_cowrie_name">Owó Ẹyọ Ìyá</string>
+    <string name="charm_mother_cowrie_description">A single cowrie shell from your late mother\'s waist-beads — all you carry of her.</string>
+    <string name="charm_inner_eye_name">Ojú-Inú</string>
+    <string name="charm_inner_eye_description">A sight beyond sight, taught to you by the old turtle-spirit of the deep. Sees past disguise and illusion.</string>
+    <string name="charm_calming_sand_name">Iyanrin Ìfayabalẹ̀</string>
+    <string name="charm_calming_sand_description">A pinch of sand blessed at the shrine. Stirred into troubled water, it stills a storm.</string>
+    <string name="charm_brass_horn_name">Ìwo Idẹ</string>
+    <string name="charm_brass_horn_description">A small brass horn taken from a beaten guardian. Its note unsettles lesser creatures into flight.</string>
+    <string name="charm_healing_leaf_name">Ewé Ìwòsàn</string>
+    <string name="charm_healing_leaf_description">A broad, warm leaf found in Arogidigba\'s ruined garden. Chewed, it knits flesh and nerve alike.</string>
+    <string name="charm_adeorun_token_name">Àmì Adéọrun</string>
+    <string name="charm_adeorun_token_description">A carved token left by the spirit Adéọrun, warm to the touch though its meaning is not yet clear.</string>
+
+    <!-- Duel round log (structured DuelLogEvent -> text; see EncounterScreen.duelLogText) -->
+    <string name="duel_log_creature_sizes_up">%1$s sizes you up.</string>
+    <string name="duel_log_telegraph_left_swing">%1$s winds up a swing from your left — dodge right!</string>
+    <string name="duel_log_telegraph_right_swing">%1$s winds up a swing from your right — dodge left!</string>
+    <string name="duel_log_telegraph_overhead">%1$s rears up for an overhead blow — block it!</string>
+    <string name="duel_log_telegraph_lunge">%1$s coils for a lunge — sidestep it!</string>
+    <string name="duel_log_perfect_dodge_swing">You slip the swing entirely — %1$s overextends, wide open!</string>
+    <string name="duel_log_perfect_dodge_lunge">You sidestep the lunge clean — %1$s is off-balance!</string>
+    <string name="duel_log_perfect_dodge_overhead">You slip the overhead blow — %1$s is off-balance!</string>
+    <string name="duel_log_blocked_hit">You raise your guard — %1$s\'s blow lands for a reduced %2$d damage.</string>
+    <string name="duel_log_partial_dodge">You throw yourself aside — only %1$d damage gets through.</string>
+    <string name="duel_log_partial_block">Your guard turns most of the thrust aside — %1$d damage.</string>
+    <string name="duel_log_flat_footed">You\'re caught flat-footed — %1$s lands a full hit for %2$d damage!</string>
+    <string name="duel_log_wrong_read">Wrong read — %1$s gets through your guard for %2$d damage!</string>
+    <string name="duel_log_shield_soften_suffix"> The calming sand softens the blow.</string>
+    <string name="duel_log_strength_gives_out">Your strength gives out.</string>
+    <string name="duel_log_stagger_hit">%1$s is staggered wide open — a brutal %2$d damage!</string>
+    <string name="duel_log_recover_hit">You catch %1$s still recovering — %2$d damage!</string>
+    <string name="duel_log_normal_hit">You strike %1$s for %2$d damage.</string>
+    <string name="duel_log_flee_success">You break away from %1$s.</string>
+    <string name="duel_log_flee_blocked">%1$s blocks your escape!</string>
+    <string name="duel_log_leaf_heal">You chew the Ewé Ìwòsàn — %1$d points steadier.</string>
+    <string name="duel_log_sand_shield">You stir the Iyanrin Ìfayabalẹ̀ into the water around you — the next blow will land softer.</string>
+    <string name="duel_log_eye_opens">The Ojú-Inú opens — %1$s\'s tells are clear to you now.</string>
+    <string name="duel_log_cowrie_hit">You invoke Owó Ẹyọ Ìyá — %1$d damage!</string>
+    <string name="duel_log_cowrie_miss">You invoke Owó Ẹyọ Ìyá, but the ward slips off harmlessly.</string>
+
+    <!-- ================= Story content (auto-generated) ================= -->
+    <!-- Creatures -->
+    <string name="creature_guard_shark_name">Yanyan Ẹ̀ṣọ́</string>
+    <string name="creature_guard_shark_description">A shark the length of a canoe, scaled in dull bronze, set to guard the water-gate of Arogidigba\'s sunken court.</string>
+    <string name="creature_arogidigba_name">Arogidigba</string>
+    <string name="creature_arogidigba_description">Queen of the deep water, half a woman\'s grace and half something far older — long nails, a moon-round face, and a hunger dressed up as hospitality.</string>
+    <string name="creature_flying_python_name">The Flying Ejò</string>
+    <string name="creature_flying_python_description">A python with wings of torn cloud, wide enough to cast a shadow over the whole market square of Àlùpàyìdá. It has come for the tribute it was promised.</string>
+
+    <!-- Story nodes -->
+    <string name="node_intro_orphan_title">A House With No Elders</string>
+    <string name="node_intro_orphan_text">You are Ìrèké, and both your parents are three years dead. The relatives who took the family\'s goats never took you in, and the town you grew up in has gone to something worse than neglect: men steal from each other in daylight now, and the ones who should keep order are the ones doing the stealing. You own a single cowrie shell from your mother\'s waist-beads and the clothes on your back.\n\nWord reaches the market that a trading ship is loading at the river landing before the rains close the water for the season. It is the only door out of this town you can see.</string>
+    <string name="choice_intro_orphan_0">Run for the landing now, before the ship fills.</string>
+    <string name="choice_intro_orphan_1">First visit the old diviner at the edge of town for a blessing.</string>
+
+    <string name="node_shrine_blessing_title">The Diviner\'s Warning</string>
+    <string name="node_shrine_blessing_text">The old woman who reads palm-nuts for the town looks at you a long moment before she throws them. \"An orphan going down to open water,\" she says, not as a question. \"The water will ask what you\'re worth before it lets you cross. Answer it with panic, and it keeps you.\" She folds a pinch of sand from her shrine floor into a twist of cloth and presses it into your hand.</string>
+    <string name="choice_shrine_blessing_0">Thank her and run for the landing.</string>
+
+    <string name="node_call_to_sea_title">Storm on the Water</string>
+    <string name="node_call_to_sea_text">You make the ship. Two days out, the sky the color of a bruise closes over the water and the storm that follows does not behave like weather — it behaves like something looking for someone. The hull splits along an old seam. Cargo, crew, and you go into the water together.</string>
+    <string name="choice_call_to_sea_0">Strike out swimming for whatever\'s darkest on the horizon.</string>
+    <string name="choice_call_to_sea_1">Cling to a spar and let the current choose for you, watching it closely.</string>
+
+    <string name="node_sea_path_direct_title">Down Into Quiet Water</string>
+    <string name="node_sea_path_direct_text">You swim until your arms burn, and the storm above fades to a memory of noise. The water beneath you goes very still, very clear, and very deep. Something long and bronze-scaled uncoils from a wreck below and rises to meet you.</string>
+    <string name="choice_sea_path_direct_0">Face whatever\'s coming up.</string>
+
+    <string name="node_sea_path_careful_title">Reading the Current</string>
+    <string name="node_sea_path_careful_text">You watch the water instead of fighting it, and the current teaches you something: it runs in two directions at once, a fast cold pull toward a wreck below, and a slower warm eddy curling off toward a shape you can\'t quite make out — something old, and shelled, and patient, floating just beneath the surface nearby.</string>
+    <string name="choice_sea_path_careful_0">Let the cold pull take you toward the wreck.</string>
+    <string name="choice_sea_path_careful_1">Swim for the strange shelled shape instead.</string>
+
+    <string name="node_encounter_shark_title">Yanyan Ẹ̀ṣọ́ Rises</string>
+    <string name="node_encounter_shark_text">The shark is the length of a canoe and its scales don\'t shine like a fish\'s should — they clink, faintly, like beaten metal. \"Small meat,\" it says, in a voice like water forced through a narrow pipe, \"the queen doesn\'t feed herself.\"</string>
+
+    <string name="node_after_shark_victory_title">Yanyan Ẹ̀ṣọ́ Sinks</string>
+    <string name="node_after_shark_victory_text">The great shark rolls belly-up and drifts down out of sight, trailing a few bronze scales that catch the last of the light. One scale has been hammered flat and rolled into a small horn. You take it before the current does.</string>
+    <string name="choice_after_shark_victory_0">Let the current carry you onward.</string>
+
+    <string name="node_after_shark_flee_title">Slipping the Current</string>
+    <string name="node_after_shark_flee_text">You twist away from Yanyan Ẹ̀ṣọ́\'s next pass and let a side-current drag you sideways, lungs screaming, until its shape is lost in the murk behind you.</string>
+    <string name="choice_after_shark_flee_0">Keep swimming and hope for air.</string>
+
+    <string name="node_death_shark_title">Taken Under</string>
+    <string name="node_death_shark_text">Yanyan Ẹ̀ṣọ́ does not miss twice. The last thing you see is bronze, and then the surface, very far above, and then nothing.</string>
+
+    <string name="node_meeting_ijinle_title">Ìjìnlẹ̀, the Old Depth</string>
+    <string name="node_meeting_ijinle_text">The shelled shape is a turtle the size of a market stall, older than the wreck it rests beside. \"Ìjìnlẹ̀,\" it says, by way of introduction. \"Depth. Most drowning men thrash past me shouting for air. You noticed me instead, so ask me something.\"</string>
+    <string name="choice_meeting_ijinle_0">\"What waits for me if I keep going down?\"</string>
+    <string name="choice_meeting_ijinle_1">\"I\'ve heard a winged serpent troubles a town called Àlùpàyìdá — is that true?\"</string>
+    <string name="choice_meeting_ijinle_2">Bow and let the current take you onward without asking.</string>
+    <string name="choice_meeting_ijinle_3">\"There\'s a dark grotto in that wreck behind you — what\'s inside?\"</string>
+
+    <string name="node_grotto_entrance_title">The Wreck\'s Dark Hold</string>
+    <string name="node_grotto_entrance_text">You double back to the broken ship and pull yourself into its flooded hold. It\'s black as a shut eye in here, and the water tastes of rust and something that was never cargo.</string>
+    <string name="choice_grotto_entrance_0">Use the Ojú-Inú to see past the dark.</string>
+    <string name="choice_grotto_entrance_1">Feel along the ribs of the hull by touch alone.</string>
+    <string name="choice_grotto_entrance_2">It isn\'t worth drowning for — return to Ìjìnlẹ̀.</string>
+
+    <string name="node_grotto_treasure_title">What the Hold Was Hiding</string>
+    <string name="node_grotto_treasure_text">With the Ojú-Inú open, the shifting shadows resolve into ordinary broken crates, nothing more — the dark only ever wanted to be taken at its word. Wedged behind a fallen beam you find a carved token, warm despite the cold water, stamped with a mark you don\'t recognize but somehow trust.</string>
+    <string name="choice_grotto_treasure_0">Pocket it and swim on toward the deep court.</string>
+
+    <string name="node_grotto_risk_title">Feeling Blind in the Wreck</string>
+    <string name="node_grotto_risk_text">Without the Ojú-Inú, the dark plays tricks on you — a rope brushes your leg and your heart nearly stops before you realize it\'s only rigging. You come up out of the hold scraped, short of breath, and short of nerve, but your hand closes on a small carved token all the same.</string>
+    <string name="choice_grotto_risk_0">Pocket it and swim on, favoring your scraped arm.</string>
+
+    <string name="node_ijinle_arogidigba_answer_title">Ìjìnlẹ̀\'s Counsel</string>
+    <string name="node_ijinle_arogidigba_answer_text">\"Arogidigba,\" Ìjìnlẹ̀ says, and the water seems to go a shade colder at the name. \"Queen of everything down here. She\'ll set you tasks built to be failed, because a failed task is a fed table. Your own eyes will lie to you in her court — you\'ll need to borrow better ones.\" It blinks, slow as a closing door, and something like a bead of dark glass surfaces from beneath its shell into your palm: the Ojú-Inú, which sees past what things pretend to be.</string>
+    <string name="choice_ijinle_arogidigba_answer_0">Thank Ìjìnlẹ̀ and swim on toward the court.</string>
+    <string name="choice_ijinle_arogidigba_answer_1">Before you go — that wreck behind you. Look inside with the Ojú-Inú now open.</string>
+
+    <string name="node_ijinle_python_answer_title">Ìjìnlẹ̀\'s Warning</string>
+    <string name="node_ijinle_python_answer_text">\"True, and old news to the fish,\" Ìjìnlẹ̀ says. \"Àlùpàyìdá pays a girl to a flying serpent every season it comes hungry, and calls it tribute instead of what it is. If you ever stand before that serpent, know that its scales hide a soft seam along the throat — a gift, not that they deserve one, from an old debt of mine.\" The words settle into your memory like something you\'ll need later.</string>
+    <string name="choice_ijinle_python_answer_0">Thank Ìjìnlẹ̀ and swim on toward the deep court.</string>
+
+    <string name="node_arogidigba_court_title">The Sunken Court</string>
+    <string name="node_arogidigba_court_text">The water opens onto a palace built from coral and old ship-bones, lit by a cold blue glow that comes from nowhere in particular. Arogidigba receives you on a throne of fused anchor-chain: a woman\'s face, a fish\'s tail, and nails the length of fingers. \"A guest,\" she says, delighted. \"Or a guest\'s worth of dinner. Prove which, and I\'ll decide.\"</string>
+    <string name="choice_arogidigba_court_0">Accept whatever task she sets, plainly.</string>
+    <string name="choice_arogidigba_court_1">Use the Ojú-Inú to look past her hospitality first.</string>
+
+    <string name="node_arogidigba_seen_through_title">The Smile Underneath</string>
+    <string name="node_arogidigba_seen_through_text">Through the Ojú-Inú, Arogidigba\'s warm welcome sits over something grinding and hungry, thin as a coat of paint. The tasks she is about to set you were never meant to be finished — they\'re meant to be enjoyed, slowly, from her side of the table. Knowing that doesn\'t make them easier. It just means you won\'t be surprised.</string>
+    <string name="choice_arogidigba_seen_through_0">Accept the task anyway, eyes open this time.</string>
+
+    <string name="node_arogidigba_task_title">An Impossible Task</string>
+    <string name="node_arogidigba_task_text">\"Sort every grain of sand in my garden by the hour it fell,\" Arogidigba says, sweet as spoiled fruit, \"and I\'ll set you free with my blessing. Fail, and you\'ll do it forever, which is a kind of freedom too, if you squint.\" You kneel at the garden\'s edge, and the sand is endless, and your hands are only hands — until a voice you haven\'t heard in three years says your name from just behind your shoulder.</string>
+    <string name="choice_arogidigba_task_0">Turn toward your mother\'s voice.</string>
+
+    <string name="node_mother_intervenes_title">Your Mother\'s Hands</string>
+    <string name="node_mother_intervenes_text">She kneels beside you in the sand exactly as you remember her, and her hands move through the grains faster than sight, sorting hours out of chaos the way she once sorted grain from chaff at the family\'s threshing floor. \"You were never meant to do this alone,\" she says. \"Nothing worth doing is.\" The task is finished before Arogidigba\'s smile has time to change, and when you look up, her smile has changed anyway — into something with teeth in it.</string>
+    <string name="choice_mother_intervenes_0">Stand and face what comes next.</string>
+
+    <string name="node_arogidigba_furious_title">The Table Overturns</string>
+    <string name="node_arogidigba_furious_text">\"Cheating,\" Arogidigba says, and the word comes out wrong, too many teeth behind it, \"is not the same as finishing.\" The coral walls of her court begin to grind shut like a closing hand.</string>
+    <string name="choice_arogidigba_furious_0">Offer the cowrie shell — your mother\'s own token — back to her spirit, and stand your ground.</string>
+    <string name="choice_arogidigba_furious_1">There\'s no talking your way out of this — meet her head-on.</string>
+
+    <string name="node_peaceful_pass_sea_title">A Debt Repaid</string>
+    <string name="node_peaceful_pass_sea_text">You hold up the last thing you own of your mother and, instead of fighting, simply refuse to be afraid of her anymore. Something in Arogidigba\'s ancient, hungry patience actually falters — she has eaten fear for so long she doesn\'t quite know what to do with its absence. \"Go, then,\" she says, and it sounds almost like she means it. \"Small meat with no fear left in it isn\'t worth the trouble.\"</string>
+    <string name="choice_peaceful_pass_sea_0">Rise to the surface without looking back.</string>
+
+    <string name="node_encounter_arogidigba_title">The Queen Shows Her Teeth</string>
+    <string name="node_encounter_arogidigba_text">Arogidigba\'s hospitality drops away like a discarded shell. What\'s underneath is old, and fast, and has never once lost this argument before.</string>
+
+    <string name="node_after_arogidigba_victory_title">The Court Comes Apart</string>
+    <string name="node_after_arogidigba_victory_text">Arogidigba folds back into the dark water she rose from, and her ruined court begins to dissolve like sugar. In what was her garden, a broad, warm leaf grows untouched by the wreckage — you take it before the current does.</string>
+    <string name="choice_after_arogidigba_victory_0">Kick for the surface with everything you have left.</string>
+
+    <string name="node_after_arogidigba_flee_title">Out Through the Coral</string>
+    <string name="node_after_arogidigba_flee_text">You break for a gap in the collapsing coral wall and don\'t look back until your lungs force you to the surface, gasping, half-convinced something is still following.</string>
+    <string name="choice_after_arogidigba_flee_0">Swim for the nearest shore.</string>
+
+    <string name="node_death_arogidigba_title">A Guest\'s Worth of Dinner</string>
+    <string name="node_death_arogidigba_text">Arogidigba was right, in the end, about which kind of guest you were. Her table is set again tomorrow, for someone else.</string>
+
+    <string name="node_washed_ashore_title">Washed Up at Àlùpàyìdá</string>
+    <string name="node_washed_ashore_text">The tide sets you down, half-drowned and shivering, on the mud-flats below a walled town. You\'re pulled upright by market women who take one look at your salt-crusted clothes and go quiet with pity rather than questions — pity, you\'ll learn within the hour, is the town\'s normal mood today. Drums are sounding from the palace, slow and funereal, though nobody has died yet.</string>
+    <string name="choice_washed_ashore_0">Ask what the drums are for.</string>
+
+    <string name="node_learn_of_python_title">The Season\'s Tribute</string>
+    <string name="node_learn_of_python_text">A winged python has troubled Àlùpàyìdá for three seasons, and today is payment day: the king\'s own daughter, Ifepade, is to be left at the shrine gate before sundown, as the town\'s elders decided was cheaper, in the end, than fighting it. Nobody meets your eyes while they tell you this. Somewhere in the palace, you\'d guess, someone is dressing a girl for a funeral that hasn\'t been called that yet.</string>
+    <string name="choice_learn_of_python_0">Go to the shrine gate before sundown.</string>
+
+    <string name="node_shrine_gate_title">Ifepade, Waiting</string>
+    <string name="node_shrine_gate_text">She is sitting very straight on the shrine steps in ceremonial white, and the only thing that gives her away is how tightly her hands are folded in her lap. \"You\'re new,\" she says, when she notices you. \"Everyone else in this town has had three seasons to learn not to stand near me today.\"</string>
+    <string name="choice_shrine_gate_0">\"I\'m not leaving. Whatever comes for you, it goes through me first.\"</string>
+    <string name="choice_shrine_gate_1">Say nothing — just sit down on the steps beside her and wait.</string>
+
+    <string name="node_python_approach_title">A Shadow Crosses the Square</string>
+    <string name="node_python_approach_text">The sky darkens the way it does before rain, except it isn\'t rain — it\'s wings, and beneath them a python long enough to have swallowed the shadow of the whole market square. It lands at the shrine gate exactly on time, coiling down toward the steps like it\'s done this three times before, because it has.</string>
+    <string name="choice_python_approach_0">Use the Ojú-Inú to find its weak point before it strikes.</string>
+    <string name="choice_python_approach_1">You already know the soft seam along its throat — strike there first.</string>
+    <string name="choice_python_approach_2">There\'s no time to be clever. Put yourself between it and Ifepade.</string>
+
+    <string name="node_python_weak_point_title">A Seam in the Scales</string>
+    <string name="node_python_weak_point_text">Through the Ojú-Inú, the python\'s armor of scales isn\'t uniform at all — there\'s a narrow, paler seam along its throat where the plates never fully closed. You\'ll be seeing double for a moment after you let the sight go, but you know exactly where to put your first strike now.</string>
+    <string name="choice_python_weak_point_0">Attack before the moment passes.</string>
+
+    <string name="node_encounter_python_title">The Flying Ejò Descends</string>
+    <string name="node_encounter_python_text">It doesn\'t hiss a warning or wait for tribute to be handed over politely — three seasons of an unchallenged meal have made it lazy about ceremony. It simply comes for whoever is standing closest to the girl in white.</string>
+
+    <string name="node_after_python_victory_title">The Shadow Lifts</string>
+    <string name="node_after_python_victory_text">The great serpent comes apart in a last thrash of torn-cloud wings and goes still across the shrine steps, and for the first time in three seasons the drums stop of their own accord instead of on schedule. Ifepade is on her feet before you are, staring at you like she\'s recalculating something.</string>
+    <string name="choice_after_python_victory_0">Meet her eyes.</string>
+
+    <string name="node_after_python_flee_title">A Costly Retreat</string>
+    <string name="node_after_python_flee_text">You pull back from the python\'s next strike and it rears up, confused for a moment by prey that moves, before turning its attention back to the steps. You\'ll need to try again, and there\'s less daylight left to do it in.</string>
+    <string name="choice_after_python_flee_0">Go back in.</string>
+
+    <string name="node_death_python_title">The Season\'s Tribute, Paid Twice</string>
+    <string name="node_death_python_text">The python takes its meal a day early this season. The drums in Àlùpàyìdá will sound again next year, on schedule, as if this were normal, because to the town, by now, it is.</string>
+
+    <string name="node_meeting_ifepade_title">What Comes After Surviving</string>
+    <string name="node_meeting_ifepade_text">Ifepade does not thank you the way a rescued princess is supposed to in the stories the town will tell about today. Instead she asks your name, then asks it again like she\'s making sure she\'ll remember it right, then laughs at herself for how much that seems to matter all of a sudden. The king, watching from the palace steps, has already begun making plans that have nothing to do with gratitude.</string>
+    <string name="choice_meeting_ifepade_0">Follow her up to the palace to meet her father properly.</string>
+
+    <string name="node_palace_welcome_title">A Guest of the Palace</string>
+    <string name="node_palace_welcome_text">The king embraces you as a son before the whole court and means it, for now, which is its own kind of danger in a palace this small. Weeks pass. You and Ifepade fall into something neither of you asked permission for, and the court — as courts do — starts asking who exactly this penniless orphan thinks he is to sit this close to the throne.</string>
+    <string name="choice_palace_welcome_0">Let the weeks pass and see what comes of it.</string>
+
+    <string name="node_court_rumor_title">A Rumor With Teeth</string>
+    <string name="node_court_rumor_text">It starts small — a whisper that the stranger who killed the serpent has been seen leaving the queens\' quarters at strange hours — and grows the way rumors do when enough people would benefit from them being true. By the time it reaches the king, it has details it never earned. He summons you to the throne room, and his face is the face of a man who wants, badly, to be told he\'s wrong.</string>
+    <string name="choice_court_rumor_0">Deny it plainly and ask him to name your accuser.</string>
+    <string name="choice_court_rumor_1">Say nothing in your own defense and simply leave the palace that night.</string>
+
+    <string name="node_confront_accuser_title">Naming Names</string>
+    <string name="node_confront_accuser_text">You hold your ground long enough that the rumor\'s actual source — a junior court official who\'d hoped to marry Ifepade to his own nephew — loses his nerve first and admits, badly, to inventing most of it. The king\'s anger doesn\'t vanish so much as run out of a place to land. He orders you flogged anyway, for the trouble of the accusation existing at all, which in this palace passes for mercy.</string>
+    <string name="choice_confront_accuser_0">Take the punishment and stay.</string>
+    <string name="choice_confront_accuser_1">This is not a place that will ever fully forgive you — leave anyway.</string>
+
+    <string name="node_flee_alupayida_title">Gone Before Dawn</string>
+    <string name="node_flee_alupayida_text">You leave the way you arrived — with nothing but the clothes on your back and, this time, a town\'s worth of gossip trailing you out the gate. Ifepade wakes to an empty room and, rather than accept the story the court gives her, starts asking questions of her own.</string>
+    <string name="choice_flee_alupayida_0">Keep walking and don\'t look back.</string>
+
+    <string name="node_ifepade_search_title">Found Again</string>
+    <string name="node_ifepade_search_text">It takes her the better part of a season, but Ifepade is not a woman who accepts a mystery lying down — she has messengers describe you at every market between here and the coast until one of them finally says yes, that man, right there, and there you are. \"You could have just told me you were leaving,\" she says, more exhausted than angry.</string>
+    <string name="choice_ifepade_search_0">Return to Àlùpàyìdá together.</string>
+
+    <string name="node_reconciliation_title">An Uneasy Peace</string>
+    <string name="node_reconciliation_text">Whatever the court believes now, the king\'s anger has genuinely gone out of him by the time you return — grief has taken its place instead. Ifepade has fallen ill with a wasting sickness no palace herbalist can name, and the king, watching his only remaining reason for living fade by the week, has run out of pride to spend on old rumors.</string>
+    <string name="choice_reconciliation_0">Ask the king what can still be done.</string>
+
+    <string name="node_king_sends_quest_title">The Only Name Left</string>
+    <string name="node_king_sends_quest_text">\"There is a wise one,\" the king says, \"far past the Mountain of Trials, who is said to know a cure for anything, including whatever is wrong with this whole broken household of mine. His name is Itanforiti. Go to him. Bring back whatever he\'ll give you — a cure, or failing that, enough sense to run this kingdom better than I have.\"</string>
+    <string name="choice_king_sends_quest_0">Set out for the mountain at once.</string>
+
+    <string name="node_mountain_path_title">The Mountain of Trials</string>
+    <string name="node_mountain_path_text">The road past Àlùpàyìdá climbs fast and then keeps climbing, through air that thins and trees that stop bothering to grow straight. Somewhere ahead, a voice — small, dry, entirely too pleased with itself — calls out that it knows a shortcut, for a price.</string>
+    <string name="choice_mountain_path_0">Follow the voice and hear its price.</string>
+    <string name="choice_mountain_path_1">Ignore it and keep to the long way up.</string>
+
+    <string name="node_ijapa_riddle_title">Ìjàpá\'s Toll</string>
+    <string name="node_ijapa_riddle_text">The tortoise Ìjàpá is sunning himself on a boundary stone, entirely too large for his shell to explain. \"One question, hunter\'s-luck stranger,\" he says. \"Answer right, and I fold this whole mountain in half for you. Answer wrong, and you walk it the slow way, which frankly you\'d have done anyway.\" He clears his throat theatrically. \"I am carried, but never walk. I open doors I cannot see. A hunter\'s son gave you one. What am I?\"</string>
+    <string name="choice_ijapa_riddle_0">\"A key.\"</string>
+    <string name="choice_ijapa_riddle_1">\"A blessing.\"</string>
+    <string name="choice_ijapa_riddle_2">\"I don\'t know — I yield.\"</string>
+
+    <string name="node_ijapa_success_title">Ìjàpá Keeps His Word, For Once</string>
+    <string name="node_ijapa_success_text">\"Correct, and unfairly quick about it,\" Ìjàpá grumbles, already sounding like he regrets the wager. He thumps the boundary stone twice with one small foot, and the path ahead folds the way a fan folds, cutting clean past both the town of men and the town of women entirely and setting you down within sight of a dark opening in the mountainside.</string>
+    <string name="choice_ijapa_success_0">Thank him and approach the opening.</string>
+
+    <string name="node_ijapa_fail_title">Wrong Guess</string>
+    <string name="node_ijapa_fail_text">\"A blessing?\" Ìjàpá looks personally wounded by the answer. \"No fold in this mountain for you, then.\" He slides off the stone and vanishes into the scrub, leaving you to the long way up, considerably more annoyed than you were a minute ago.</string>
+    <string name="choice_ijapa_fail_0">Keep climbing.</string>
+
+    <string name="node_town_of_men_title">The Town of Men Alone</string>
+    <string name="node_town_of_men_text">Halfway up the mountain sits a town of men only, tidy and quiet and, you gather from an old resident\'s careful explanation, deeply lonely — when a man here is ready to marry, custom requires a wife be sent for from somewhere considerably stranger than the next village over. Nobody here troubles you. Nobody here, you get the sense, has much left to say to a stranger passing through.</string>
+    <string name="choice_town_of_men_0">Pass through without lingering.</string>
+
+    <string name="node_town_of_women_title">The Town of Women Alone</string>
+    <string name="node_town_of_women_text">Higher still, its mirror: a town of women only, who watch you cross their square with the specific, appraising patience of people who have seen very few strangers and intend to remember this one. Nobody stops you either. The path beyond climbs on toward a dark opening in the mountainside.</string>
+    <string name="choice_town_of_women_0">Continue to the opening in the rock.</string>
+
+    <string name="node_itanforiti_threshold_title">A Hole in the Ground</string>
+    <string name="node_itanforiti_threshold_text">Itanforiti\'s dwelling is, unpromisingly, a hole in the ground — until you notice the hole is lit from within by a warm and steady light that no torch makes. A voice from inside, patient as bedrock, asks who has come climbing so far up a mountain for an old man who never advertised.</string>
+    <string name="choice_itanforiti_threshold_0">\"Ìrèké, sent by the king of Àlùpàyìdá, for wisdom and a cure.\"</string>
+    <string name="choice_itanforiti_threshold_1">Offer the carved token from the wreck, and say nothing else.</string>
+
+    <string name="node_itanforiti_token_title">A Token Recognized</string>
+    <string name="node_itanforiti_token_text">The old voice goes quiet a long moment at the sight of the token. \"Adéọrun still gives those out, then,\" it says, warmer now, almost fond. \"He doesn\'t hand them to just anyone drowning in a wreck. Come in, since he apparently vouches for you — that saves us both a great deal of testing.\"</string>
+    <string name="choice_itanforiti_token_0">Step down into the light.</string>
+
+    <string name="node_itanforiti_meeting_title">Itanforiti</string>
+    <string name="node_itanforiti_meeting_text">He has the head of an old man and, unmistakably, the feet of a cow, and he is somehow the least strange thing you\'ve met since the storm took your ship. \"Sit,\" he says. \"Everyone who reaches me wants a cure for someone else\'s suffering. Before I give you one, tell me honestly what you think is actually wrong with that palace you came from.\"</string>
+    <string name="choice_itanforiti_meeting_0">\"A king too proud to admit his court poisoned something good with rumor.\"</string>
+    <string name="choice_itanforiti_meeting_1">\"A girl dying because nobody in that palace was ever taught to love without owning.\"</string>
+    <string name="choice_itanforiti_meeting_2">\"I don\'t fully know — that\'s why I climbed a mountain to ask you instead of guessing.\"</string>
+
+    <string name="node_itanforiti_pride_lesson_title">On Covetousness</string>
+    <string name="node_itanforiti_pride_lesson_text">Itanforiti nods slowly, unsurprised. \"A man who guards his throne with suspicion instead of love ends up ruling a room full of people just as suspicious as he is — he trained them to it.\" He presses a small clay vial into your hand. \"This cures the sickness. It will not cure the palace. That part is yours to finish, if you\'re willing to stay and do it.\"</string>
+    <string name="choice_itanforiti_pride_lesson_0">Accept the vial and start back down the mountain.</string>
+
+    <string name="node_itanforiti_love_lesson_title">On Love</string>
+    <string name="node_itanforiti_love_lesson_text">\"Closer,\" Itanforiti says, something like approval in his old voice. \"Love is the only rope strong enough to hold a household together once fear stops working — and fear always stops working eventually.\" He hands you the vial. \"Give this to her yourself. Not a servant. The medicine only half matters. Who hands it to her matters the other half.\"</string>
+    <string name="choice_itanforiti_love_lesson_0">Accept the vial and start back down the mountain.</string>
+
+    <string name="node_itanforiti_honesty_lesson_title">On Honesty</string>
+    <string name="node_itanforiti_honesty_lesson_text">Itanforiti actually laughs, a dry sound like a door hinge. \"Every other visitor I get pretends to already understand the thing they\'ve climbed a mountain to learn. You\'re the first this decade to just say you don\'t.\" He hands you the vial without further test. \"That, alone, is most of the wisdom I had to give you. The rest you\'ll work out on the way down.\"</string>
+    <string name="choice_itanforiti_honesty_lesson_0">Accept the vial and start back down the mountain.</string>
+
+    <string name="node_return_to_alupayida_title">Home to a Waiting Palace</string>
+    <string name="node_return_to_alupayida_text">The king meets you at the gate himself, which he has never once done for anyone. Ifepade is carried out to see you arrive, too weak to stand but awake enough to argue with her attendants about it. Itanforiti\'s vial is small enough to fit in one closed hand.</string>
+    <string name="choice_return_to_alupayida_0">Give the medicine to Ifepade yourself, and tell her what Itanforiti said about love.</string>
+    <string name="choice_return_to_alupayida_1">Present the medicine to the king first, as is formally proper.</string>
+    <string name="choice_return_to_alupayida_2">Simply hand the vial to the court physician and step back.</string>
+    <string name="choice_return_to_alupayida_3">Offer the vial along with the carved token, saying nothing of what either one cost you.</string>
+
+    <string name="node_ending_love_title">What the Cure Actually Was</string>
+    <string name="node_ending_love_text">Ifepade recovers within days, faster than the herbalists can quite explain, and the king — watching his daughter laugh again at something you said under her breath — finally stops asking whether you\'re worthy of her and starts asking when the wedding will be. Years later, when the old king dies peacefully in his sleep, Àlùpàyìdá does not hesitate over who should take the throne. You rule a household that finally learned, the hard way, what Itanforiti tried to tell you on a mountain: that fear rots a palace from the inside, and love is the only rope strong enough to hold one up instead.</string>
+
+    <string name="node_ending_pride_reformed_title">A King Who Finally Listened</string>
+    <string name="node_ending_pride_reformed_text">The king takes the vial from your hands like a man accepting a verdict, not a gift, and for once doesn\'t argue with it. Ifepade recovers slowly, but she recovers. More surprising still, the king spends his remaining years actually trying to be the ruler Itanforiti\'s lesson accused him of failing to be — and names you, publicly and without prompting, as the reason he finally started. When he dies, the throne comes to you not by rumor or romance but by a court that watched you both change and decided you\'d earned it.</string>
+
+    <string name="node_ending_dutiful_title">A Cure, Delivered Properly</string>
+    <string name="node_ending_dutiful_text">You step back and let the physicians do their work without inserting yourself into the story of it, and Ifepade recovers all the same. It\'s a quieter ending than the songs about you will eventually claim — no mountain romance, no dramatic bedside vow — just an orphan who did the necessary thing competently and let the credit fall where it wanted to. In time, when the throne needs a steady hand more than a beloved one, it finds its way to you anyway.</string>
+
+    <string name="node_ending_secret_title">The Debt Nobody Named</string>
+    <string name="node_ending_secret_text">At the sight of the carved token, the king\'s face does something none of his courtiers have ever managed to describe to each other afterward without disagreeing about it. \"Adéọrun\'s mark,\" he says quietly, \"was buried with my own grandfather\'s debts, and no one alive was meant to still be carrying one of these.\" He asks nothing further. Ifepade recovers; the token disappears back into whatever ledger it came from; and you leave the whole audience having explained nothing at all, which — as with the forest before it — turns out to be exactly what was owed.</string>
+
 </resources>

@@ -24,6 +24,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.techducat.irekeonibudo.R
 import com.techducat.irekeonibudo.ui.theme.BoneWhite
 
 /**
@@ -46,7 +48,7 @@ fun StatBar(label: String, value: Int, max: Int = 100, color: Color, modifier: M
                 color = BoneWhite.copy(alpha = 0.85f)
             )
             Text(
-                text = "$value/$max",
+                text = stringResource(R.string.stat_value_over_max, value, max),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = color
             )

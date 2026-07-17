@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.techducat.irekeonibudo.R
 import com.techducat.irekeonibudo.data.StoryNode
 import com.techducat.irekeonibudo.ui.components.AppBackground
 import com.techducat.irekeonibudo.ui.components.IllustrationFrame
@@ -42,7 +44,7 @@ fun EndingScreen(node: StoryNode, onPlayAgain: () -> Unit) {
                 SceneCanvas(scene = node.scene)
             }
             Text(
-                text = node.title,
+                text = stringResource(node.titleRes),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     shadow = Shadow(color = EmberGold.copy(alpha = 0.4f), offset = Offset(0f, 0f), blurRadius = 22f)
                 ),
@@ -62,13 +64,13 @@ fun EndingScreen(node: StoryNode, onPlayAgain: () -> Unit) {
                     )
             )
             Text(
-                text = node.text,
+                text = stringResource(node.textRes),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
             Button(onClick = onPlayAgain, modifier = Modifier.fillMaxWidth(0.8f)) {
-                Text("Begin a New Journey")
+                Text(stringResource(R.string.ending_new_journey))
             }
             Spacer(Modifier.height(24.dp))
         }

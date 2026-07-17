@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.techducat.irekeonibudo.R
 import com.techducat.irekeonibudo.data.Player
 import com.techducat.irekeonibudo.ui.theme.BloodRed
 import com.techducat.irekeonibudo.ui.theme.DeepSeaBlue
@@ -36,9 +38,9 @@ fun PlayerStatusBar(player: Player, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            StatBar(label = "Ìgboyà", value = player.igboya, color = EmberGold, modifier = Modifier.weight(1f))
-            StatBar(label = "Oògùn", value = player.oogun, color = SpiritViolet, modifier = Modifier.weight(1f))
-            StatBar(label = "Ìlera", value = player.ilera, color = BloodRed, modifier = Modifier.weight(1f))
+            StatBar(label = stringResource(R.string.stat_label_igboya), value = player.igboya, color = EmberGold, modifier = Modifier.weight(1f))
+            StatBar(label = stringResource(R.string.stat_label_oogun), value = player.oogun, color = SpiritViolet, modifier = Modifier.weight(1f))
+            StatBar(label = stringResource(R.string.stat_label_ilera), value = player.ilera, color = BloodRed, modifier = Modifier.weight(1f))
         }
         // A hairline gold seam along the bottom edge, separating chrome from the scene below.
         Box(

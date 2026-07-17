@@ -5,6 +5,7 @@ import com.techducat.irekeonibudo.data.Charm
 import com.techducat.irekeonibudo.data.Creature
 import com.techducat.irekeonibudo.data.CreaturePhase
 import com.techducat.irekeonibudo.data.DodgeDirection
+import com.techducat.irekeonibudo.data.DuelLogEvent
 import com.techducat.irekeonibudo.data.DuelOutcome
 import com.techducat.irekeonibudo.data.DuelState
 import com.techducat.irekeonibudo.data.DuelTiming
@@ -19,6 +20,10 @@ data class DuelResult(val state: DuelState, val player: Player)
  * Stateless, frame-driven combat resolver. GameViewModel owns the StateFlow and calls into
  * here every frame (tick) and on every player input; this class just computes the next state.
  * Kept separate from GameViewModel so the actual combat rules are unit-testable without Android.
+ *
+ * Round-log entries are emitted as structured [DuelLogEvent]s rather than pre-rendered text —
+ * this class has no Android Context to call getString() with, so localized display text is
+ * resolved only at the UI layer (see EncounterScreen).
  */
 object DuelEngine {
 
@@ -27,7 +32,7 @@ object DuelEngine {
         creatureHealth = creature.maxHealth,
         creaturePhase = CreaturePhase.IDLE,
         creaturePhaseDurationMs = randomIdleMs(random),
-        roundLog = listOf("${creature.name} sizes you up.")
+        roundLog = listOf(DuelLogEvent.CreatureSizesUp)
     )
 
     // --- Frame tick: advances timers, drives the creature AI, resolves strikes on schedule ---
@@ -48,19 +53,19 @@ object DuelEngine {
                         creaturePhase = CreaturePhase.TELEGRAPH,
                         telegraphType = type,
                         creaturePhaseDurationMs = DuelTiming.TELEGRAPH_MS,
-                        roundLog = s.roundLog + telegraphLine(s.creature.name, type)
+                        roundLog = s.roundLog + DuelLogEvent.Telegraph(type)
                     )
                     creatureElapsed = 0L
                 }
                 CreaturePhase.TELEGRAPH -> {
                     // The strike instant: resolve against whatever the player is doing right now.
-                    val (dmg, line, staggerCreature) = resolveCreatureStrike(s, p, random)
+                    val (dmg, event, staggerCreature) = resolveCreatureStrike(s, p, random)
                     if (dmg > 0) p = p.copy(ilera = (p.ilera - dmg).coerceIn(0, 100))
                     s = s.copy(
                         creaturePhase = CreaturePhase.STRIKE,
                         creaturePhaseDurationMs = DuelTiming.STRIKE_MS,
                         playerShielded = false,
-                        roundLog = s.roundLog + line
+                        roundLog = s.roundLog + event
                     )
                     if (staggerCreature) {
                         // A perfectly-timed dodge staggers the creature — punish window for free.
@@ -86,7 +91,7 @@ object DuelEngine {
         s = s.copy(creaturePhaseElapsedMs = creatureElapsed)
 
         if (p.ilera <= 0 && s.outcome == null) {
-            s = s.copy(outcome = DuelOutcome.DEFEAT, roundLog = s.roundLog + "Your strength gives out.")
+            s = s.copy(outcome = DuelOutcome.DEFEAT, roundLog = s.roundLog + DuelLogEvent.StrengthGivesOut)
         }
 
         // --- player state machine ---
@@ -120,10 +125,10 @@ object DuelEngine {
 
             PlayerActionState.ATTACK_STARTUP -> if (elapsed >= DuelTiming.ATTACK_STARTUP_MS) {
                 // Active frame begins now — resolve the hit against the creature immediately.
-                val (dmg, line, defeated) = resolvePlayerAttack(state, player, random)
+                val (dmg, event, defeated) = resolvePlayerAttack(state, player, random)
                 var s2 = state.copy(
                     creatureHealth = (state.creatureHealth - dmg).coerceAtLeast(0),
-                    roundLog = state.roundLog + line
+                    roundLog = state.roundLog + event
                 )
                 if (defeated) s2 = s2.copy(creaturePhase = CreaturePhase.DEFEATED, outcome = DuelOutcome.VICTORY)
                 PlayerAdvance(PlayerActionState.ATTACK_ACTIVE, true, s2, player)
@@ -177,12 +182,12 @@ object DuelEngine {
         val chance = (if (whistleBoost) 70 else 30) + player.igboya / 2
         val success = random.nextInt(0, 100) < chance
         return if (success) {
-            DuelResult(state.copy(outcome = DuelOutcome.FLED, roundLog = state.roundLog + "You break away from ${state.creature.name}."), player)
+            DuelResult(state.copy(outcome = DuelOutcome.FLED, roundLog = state.roundLog + DuelLogEvent.FleeSuccess), player)
         } else {
             DuelResult(
                 state.copy(
                     fleeCooldownEndMs = state.elapsedMs + DuelTiming.WHISTLE_COOLDOWN_MS,
-                    roundLog = state.roundLog + "${state.creature.name} blocks your escape!"
+                    roundLog = state.roundLog + DuelLogEvent.FleeBlocked
                 ),
                 player
             )
@@ -207,14 +212,14 @@ object DuelEngine {
                 if (charm !in p.charms) return DuelResult(state, player)
                 val healed = random.nextInt(20, 31)
                 p = p.clampedCopy(ilera = p.ilera + healed).copy(charms = p.charms - Charm.HEALING_LEAF)
-                s = s.copy(roundLog = s.roundLog + "You chew the Ewé Ìwòsàn — $healed points steadier.")
+                s = s.copy(roundLog = s.roundLog + DuelLogEvent.LeafHeal(healed))
                 DuelResult(s, p)
             }
             Charm.CALMING_SAND -> {
                 s = s.copy(
                     playerShielded = true,
                     charmCooldowns = s.charmCooldowns + (charm to s.elapsedMs + DuelTiming.AMULET_COOLDOWN_MS),
-                    roundLog = s.roundLog + "You stir the Iyanrin Ìfayabalẹ̀ into the water around you — the next blow will land softer."
+                    roundLog = s.roundLog + DuelLogEvent.SandShield
                 )
                 DuelResult(s, p)
             }
@@ -222,7 +227,7 @@ object DuelEngine {
                 if (!s.weakPointFound) {
                     s = s.copy(
                         weakPointFound = true,
-                        roundLog = s.roundLog + "The Ojú-Inú opens — ${s.creature.name}'s tells are clear to you now."
+                        roundLog = s.roundLog + DuelLogEvent.EyeOpens
                     )
                 }
                 DuelResult(s, p)
@@ -236,7 +241,7 @@ object DuelEngine {
                 s = s.copy(
                     creatureHealth = newHealth,
                     charmCooldowns = s.charmCooldowns + (charm to s.elapsedMs + DuelTiming.AMULET_COOLDOWN_MS),
-                    roundLog = s.roundLog + if (hit) "You invoke ${charm.displayName} — $dmg damage!" else "You invoke ${charm.displayName}, but the ward slips off harmlessly.",
+                    roundLog = s.roundLog + if (hit) DuelLogEvent.CowrieHit(dmg) else DuelLogEvent.CowrieMiss,
                     outcome = if (defeated) DuelOutcome.VICTORY else s.outcome,
                     creaturePhase = if (defeated) CreaturePhase.DEFEATED else s.creaturePhase
                 )
@@ -248,10 +253,9 @@ object DuelEngine {
 
     // --- Resolution math ---
 
-    /** Returns (damageToPlayer, logLine, staggerCreature). staggerCreature = a perfect dodge earns a punish window. */
-    private fun resolveCreatureStrike(state: DuelState, player: Player, random: Random): Triple<Int, String, Boolean> {
-        val type = state.telegraphType ?: return Triple(0, "", false)
-        val name = state.creature.name
+    /** Returns (damageToPlayer, logEvent, staggerCreature). staggerCreature = a perfect dodge earns a punish window. */
+    private fun resolveCreatureStrike(state: DuelState, player: Player, random: Random): Triple<Int, DuelLogEvent, Boolean> {
+        val type = state.telegraphType ?: return Triple(0, DuelLogEvent.None, false)
         val base = random.nextInt(state.creature.attackPower - 5, state.creature.attackPower + 6).coerceAtLeast(1)
 
         val dodgingActive = state.playerAction == PlayerActionState.DODGE_ACTIVE
@@ -269,83 +273,76 @@ object DuelEngine {
         val partialBlock = type == AttackType.LUNGE && blocking
 
         var damage = base
-        var line: String
+        var event: DuelLogEvent
         var stagger = false
 
         when {
             correctDodge -> {
                 damage = 0
                 stagger = true
-                line = perfectDodgeLine(name, type)
+                event = DuelLogEvent.PerfectDodge(type)
             }
             correctBlock -> {
                 damage = (base * 0.25).toInt()
-                line = "You raise your guard — ${name}'s blow lands for a reduced $damage damage."
+                event = DuelLogEvent.BlockedHit(damage)
             }
             partialDodge -> {
                 damage = (base * 0.5).toInt()
-                line = "You throw yourself aside — only $damage damage gets through."
+                event = DuelLogEvent.PartialDodge(damage)
             }
             partialBlock -> {
                 damage = (base * 0.6).toInt()
-                line = "Your guard turns most of the thrust aside — $damage damage."
+                event = DuelLogEvent.PartialBlock(damage)
             }
             else -> {
-                line = if (state.playerAction == PlayerActionState.NEUTRAL) {
-                    "You're caught flat-footed — $name lands a full hit for $damage damage!"
+                event = if (state.playerAction == PlayerActionState.NEUTRAL) {
+                    DuelLogEvent.FlatFooted(damage)
                 } else {
-                    "Wrong read — $name gets through your guard for $damage damage!"
+                    DuelLogEvent.WrongRead(damage)
                 }
             }
         }
 
         if (state.playerShielded && damage > 0) {
-            damage = damage / 2
-            line += " The calming sand softens the blow."
+            damage /= 2
+            event = when (event) {
+                is DuelLogEvent.BlockedHit -> event.copy(damage = damage, shielded = true)
+                is DuelLogEvent.PartialDodge -> event.copy(damage = damage, shielded = true)
+                is DuelLogEvent.PartialBlock -> event.copy(damage = damage, shielded = true)
+                is DuelLogEvent.FlatFooted -> event.copy(damage = damage, shielded = true)
+                is DuelLogEvent.WrongRead -> event.copy(damage = damage, shielded = true)
+                else -> event
+            }
         }
 
-        return Triple(damage, line, stagger)
+        return Triple(damage, event, stagger)
     }
 
-    /** Returns (damageToCreature, logLine, defeated). */
-    private fun resolvePlayerAttack(state: DuelState, player: Player, random: Random): Triple<Int, String, Boolean> {
-        val name = state.creature.name
+    /** Returns (damageToCreature, logEvent, defeated). */
+    private fun resolvePlayerAttack(state: DuelState, player: Player, random: Random): Triple<Int, DuelLogEvent, Boolean> {
         val weakPointBonus = if (state.weakPointFound) 4 else 0
         var damage = random.nextInt(8, 16) + player.igboya / 10 + weakPointBonus
 
-        val line: String
+        val event: DuelLogEvent
         when (state.creaturePhase) {
             CreaturePhase.STAGGERED -> {
                 damage = (damage * 2.0).toInt()
-                line = "$name is staggered wide open — a brutal $damage damage!"
+                event = DuelLogEvent.StaggerHit(damage)
             }
             CreaturePhase.RECOVER -> {
                 damage = (damage * 1.5).toInt()
-                line = "You catch $name still recovering — $damage damage!"
+                event = DuelLogEvent.RecoverHit(damage)
             }
             else -> {
-                line = "You strike $name for $damage damage."
+                event = DuelLogEvent.NormalHit(damage)
             }
         }
         val newHealth = (state.creatureHealth - damage).coerceAtLeast(0)
-        return Triple(damage, line, newHealth <= 0)
+        return Triple(damage, event, newHealth <= 0)
     }
 
     private fun randomIdleMs(random: Random): Long =
         random.nextLong(DuelTiming.CREATURE_IDLE_MIN_MS, DuelTiming.CREATURE_IDLE_MAX_MS)
-
-    private fun telegraphLine(name: String, type: AttackType): String = when (type) {
-        AttackType.LEFT_SWING -> "$name winds up a swing from your left — dodge right!"
-        AttackType.RIGHT_SWING -> "$name winds up a swing from your right — dodge left!"
-        AttackType.OVERHEAD -> "$name rears up for an overhead blow — block it!"
-        AttackType.LUNGE -> "$name coils for a lunge — sidestep it!"
-    }
-
-    private fun perfectDodgeLine(name: String, type: AttackType): String = when (type) {
-        AttackType.LEFT_SWING, AttackType.RIGHT_SWING -> "You slip the swing entirely — $name overextends, wide open!"
-        AttackType.LUNGE -> "You sidestep the lunge clean — $name is off-balance!"
-        AttackType.OVERHEAD -> "You slip the overhead blow — $name is off-balance!"
-    }
 
     const val CHARM_OOGUN_COST = 10
 }

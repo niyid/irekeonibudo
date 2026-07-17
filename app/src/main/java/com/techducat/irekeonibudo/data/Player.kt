@@ -1,5 +1,8 @@
 package com.techducat.irekeonibudo.data
 
+import androidx.annotation.StringRes
+import com.techducat.irekeonibudo.R
+
 /**
  * The player's persistent state as Ìrèké, an orphaned wanderer making his way
  * in a world of tricksters, spirits, and kings.
@@ -40,11 +43,11 @@ data class Player(
     )
 }
 
-enum class Charm(val displayName: String, val description: String) {
-    MOTHER_COWRIE("Owó Ẹyọ Ìyá", "A single cowrie shell from your late mother's waist-beads — all you carry of her."),
-    INNER_EYE("Ojú-Inú", "A sight beyond sight, taught to you by the old turtle-spirit of the deep. Sees past disguise and illusion."),
-    CALMING_SAND("Iyanrin Ìfayabalẹ̀", "A pinch of sand blessed at the shrine. Stirred into troubled water, it stills a storm."),
-    BRASS_HORN("Ìwo Idẹ", "A small brass horn taken from a beaten guardian. Its note unsettles lesser creatures into flight."),
-    HEALING_LEAF("Ewé Ìwòsàn", "A broad, warm leaf found in Arogidigba's ruined garden. Chewed, it knits flesh and nerve alike."),
-    ADEORUN_TOKEN("Àmì Adéọrun", "A carved token left by the spirit Adéọrun, warm to the touch though its meaning is not yet clear.")
+enum class Charm(@StringRes val displayNameRes: Int, @StringRes val descriptionRes: Int) {
+    MOTHER_COWRIE(R.string.charm_mother_cowrie_name, R.string.charm_mother_cowrie_description),
+    INNER_EYE(R.string.charm_inner_eye_name, R.string.charm_inner_eye_description),
+    CALMING_SAND(R.string.charm_calming_sand_name, R.string.charm_calming_sand_description),
+    BRASS_HORN(R.string.charm_brass_horn_name, R.string.charm_brass_horn_description),
+    HEALING_LEAF(R.string.charm_healing_leaf_name, R.string.charm_healing_leaf_description),
+    ADEORUN_TOKEN(R.string.charm_adeorun_token_name, R.string.charm_adeorun_token_description)
 }

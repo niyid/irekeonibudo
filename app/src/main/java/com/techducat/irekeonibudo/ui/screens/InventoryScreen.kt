@@ -23,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.techducat.irekeonibudo.R
 import com.techducat.irekeonibudo.data.Player
 import com.techducat.irekeonibudo.ui.components.AppBackground
 import com.techducat.irekeonibudo.ui.components.PlayerStatusBar
@@ -35,13 +37,13 @@ fun InventoryScreen(player: Player, onBack: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         PlayerStatusBar(player = player)
         Text(
-            text = "Charms Gathered",
+            text = stringResource(R.string.inventory_heading),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
         )
         if (player.charms.isEmpty()) {
             Text(
-                text = "You carry nothing but the clothes on your back.",
+                text = stringResource(R.string.inventory_empty_state),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
@@ -76,8 +78,8 @@ fun InventoryScreen(player: Player, onBack: () -> Unit) {
                         // A small glowing charm token stands in for an icon/asset.
                         CharmToken()
                         Column {
-                            Text(text = charm.displayName, style = MaterialTheme.typography.titleLarge)
-                            Text(text = charm.description, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = stringResource(charm.displayNameRes), style = MaterialTheme.typography.titleLarge)
+                            Text(text = stringResource(charm.descriptionRes), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
@@ -89,7 +91,7 @@ fun InventoryScreen(player: Player, onBack: () -> Unit) {
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-            Text("Back")
+            Text(stringResource(R.string.action_back))
         }
     }
     }

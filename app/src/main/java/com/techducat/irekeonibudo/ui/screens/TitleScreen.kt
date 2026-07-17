@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.techducat.irekeonibudo.R
 import com.techducat.irekeonibudo.data.SceneType
 import com.techducat.irekeonibudo.ui.components.AppBackground
 import com.techducat.irekeonibudo.ui.components.IllustrationFrame
@@ -71,7 +73,7 @@ fun TitleScreen(
             }
             Spacer(Modifier.height(24.dp))
             Text(
-                text = "ÌRÈKÉ ONÍBÙDÓ",
+                text = stringResource(R.string.title_screen_heading),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     shadow = Shadow(color = EmberGold.copy(alpha = 0.45f), offset = Offset(0f, 0f), blurRadius = 24f)
                 ),
@@ -89,19 +91,19 @@ fun TitleScreen(
                     )
             )
             Text(
-                text = "From Shipwreck to Crown\nAn Orphan's Journey Through Deep Water and Wisdom",
+                text = stringResource(R.string.title_screen_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = AshGrey,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 10.dp, bottom = 32.dp)
             )
             Button(onClick = onNewGame, modifier = Modifier.fillMaxWidth(0.8f)) {
-                Text("New Journey")
+                Text(stringResource(R.string.title_screen_new_journey))
             }
             Spacer(Modifier.height(12.dp))
             if (saveExists) {
                 OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth(0.8f)) {
-                    Text("Continue")
+                    Text(stringResource(R.string.title_screen_continue))
                 }
             }
         }
