@@ -24,12 +24,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.techducat.irekeonibudo.data.Player
+import com.techducat.irekeonibudo.ui.components.AppBackground
 import com.techducat.irekeonibudo.ui.components.PlayerStatusBar
 import com.techducat.irekeonibudo.ui.theme.EmberGold
 import com.techducat.irekeonibudo.ui.theme.MidSeaTeal
 
 @Composable
 fun InventoryScreen(player: Player, onBack: () -> Unit) {
+    AppBackground {
     Column(modifier = Modifier.fillMaxSize()) {
         PlayerStatusBar(player = player)
         Text(
@@ -89,6 +91,7 @@ fun InventoryScreen(player: Player, onBack: () -> Unit) {
         ) {
             Text("Back")
         }
+    }
     }
 }
 

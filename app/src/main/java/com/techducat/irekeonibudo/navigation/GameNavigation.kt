@@ -41,13 +41,17 @@ fun IrekeOnibudoApp(viewModel: GameViewModel) {
                 onOpenInventory = { viewModel.toggleInventory(true) }
             )
 
-            Screen.ENCOUNTER -> state.activeEncounter?.let { encounter ->
+            Screen.ENCOUNTER -> state.activeEncounter?.let { duel ->
                 EncounterScreen(
                     state = state,
-                    encounter = encounter,
-                    onAttack = { viewModel.encounterAttack() },
-                    onUseCharm = { charm -> viewModel.encounterUseCharm(charm) },
-                    onFlee = { viewModel.encounterFlee() }
+                    duel = duel,
+                    onTick = { deltaMs -> viewModel.duelTick(deltaMs) },
+                    onDodge = { direction -> viewModel.duelDodge(direction) },
+                    onBlockStart = { viewModel.duelBlockStart() },
+                    onBlockEnd = { viewModel.duelBlockEnd() },
+                    onAttack = { viewModel.duelAttack() },
+                    onUseCharm = { charm -> viewModel.duelUseCharm(charm) },
+                    onFlee = { viewModel.duelFlee() }
                 )
             }
 

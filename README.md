@@ -10,8 +10,10 @@ killed more than once.
 
 ## Stack
 Kotlin, Jetpack Compose (Material3), Room (save/continue), a Canvas-based
-procedural scene renderer (no external art assets), single-Activity + StateFlow
-architecture — no Hilt, kept intentionally lean.
+procedural scene renderer (no external art assets), a real-time frame-driven
+duel engine (dodge/block/attack resolved by timing rather than turn-based hit
+rolls), single-Activity + StateFlow architecture — no Hilt, kept
+intentionally lean.
 
 ## Run it
 ```
@@ -25,11 +27,13 @@ Or open the folder directly in Android Studio (Koala+) and hit Run.
 ```
 app/src/main/java/com/techducat/irekeonibudo/
   data/        StoryNode/Choice/Creature/Player models, StoryData.kt (all narrative content),
-               Room save-game persistence, GameState
-  viewmodel/   GameViewModel — story branching + turn-based combat engine
-  ui/theme/    Colors, typography, dark sea-and-gold theme
-  ui/components/  SceneCanvas (procedural scene art), StatBar, ChoiceButton, PlayerStatusBar
-  ui/screens/  Title, Story, Encounter, Inventory, Ending
+               Room save-game persistence, GameState, DuelState (real-time combat state)
+  engine/      DuelEngine — stateless, frame-driven combat resolver (dodge/block/attack timing)
+  viewmodel/   GameViewModel — story branching + duel tick/action delegation to DuelEngine
+  ui/theme/    Colors, serif/sans typography, dark sea-and-gold theme
+  ui/components/  AppBackground (starfield backdrop), SceneCanvas + CreatureCanvas (procedural
+               scene/creature art), IllustrationFrame, StatBar, ChoiceButton, PlayerStatusBar
+  ui/screens/  Title, Story, Encounter (real-time duel), Inventory, Ending
   navigation/  GameNavigation.kt — screen switch driven by GameState.screen
 ```
 

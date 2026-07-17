@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.techducat.irekeonibudo.data.SceneType
+import com.techducat.irekeonibudo.ui.components.AppBackground
 import com.techducat.irekeonibudo.ui.components.IllustrationFrame
 import com.techducat.irekeonibudo.ui.components.SceneCanvas
 import com.techducat.irekeonibudo.ui.theme.AshGrey
@@ -53,53 +54,55 @@ fun TitleScreen(
     var saveExists by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { saveExists = hasSave() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        IllustrationFrame {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                // Open water — the storm that opens Ìrèké's story, not a hunter's forest.
-                SceneCanvas(scene = SceneType.RIVER)
-                BubbleOverlay(modifier = Modifier.matchParentSize())
+    AppBackground {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            IllustrationFrame {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    // Open water — the storm that opens Ìrèké's story, not a hunter's forest.
+                    SceneCanvas(scene = SceneType.RIVER)
+                    BubbleOverlay(modifier = Modifier.matchParentSize())
+                }
             }
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = "ÌRÈKÉ ONÍBÙDÓ",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                shadow = Shadow(color = EmberGold.copy(alpha = 0.45f), offset = Offset(0f, 0f), blurRadius = 24f)
-            ),
-            textAlign = TextAlign.Center
-        )
-        Spacer(
-            Modifier
-                .padding(top = 10.dp)
-                .width(56.dp)
-                .height(2.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(EmberGold.copy(alpha = 0f), EmberGold, EmberGold.copy(alpha = 0f))
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = "ÌRÈKÉ ONÍBÙDÓ",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    shadow = Shadow(color = EmberGold.copy(alpha = 0.45f), offset = Offset(0f, 0f), blurRadius = 24f)
+                ),
+                textAlign = TextAlign.Center
+            )
+            Spacer(
+                Modifier
+                    .padding(top = 10.dp)
+                    .width(56.dp)
+                    .height(2.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(EmberGold.copy(alpha = 0f), EmberGold, EmberGold.copy(alpha = 0f))
+                        )
                     )
-                )
-        )
-        Text(
-            text = "From Shipwreck to Crown\nAn Orphan's Journey Through Deep Water and Wisdom",
-            style = MaterialTheme.typography.bodyMedium,
-            color = AshGrey,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 10.dp, bottom = 32.dp)
-        )
-        Button(onClick = onNewGame, modifier = Modifier.fillMaxWidth(0.8f)) {
-            Text("New Journey")
-        }
-        Spacer(Modifier.height(12.dp))
-        if (saveExists) {
-            OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth(0.8f)) {
-                Text("Continue")
+            )
+            Text(
+                text = "From Shipwreck to Crown\nAn Orphan's Journey Through Deep Water and Wisdom",
+                style = MaterialTheme.typography.bodyMedium,
+                color = AshGrey,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 10.dp, bottom = 32.dp)
+            )
+            Button(onClick = onNewGame, modifier = Modifier.fillMaxWidth(0.8f)) {
+                Text("New Journey")
+            }
+            Spacer(Modifier.height(12.dp))
+            if (saveExists) {
+                OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth(0.8f)) {
+                    Text("Continue")
+                }
             }
         }
     }

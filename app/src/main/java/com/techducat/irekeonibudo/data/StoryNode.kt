@@ -39,7 +39,7 @@ data class Choice(
     val setsFlag: String? = null
 )
 
-/** A creature or trial encountered on the journey, resolved via EncounterScreen's turn loop. */
+/** A creature or trial encountered on the journey, fought in real time via DuelScreen/DuelEngine. */
 data class Creature(
     val id: String,
     val name: String,

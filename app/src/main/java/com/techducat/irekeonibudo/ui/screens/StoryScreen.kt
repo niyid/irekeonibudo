@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import com.techducat.irekeonibudo.data.Choice
 import com.techducat.irekeonibudo.data.GameState
+import com.techducat.irekeonibudo.ui.components.AppBackground
 import com.techducat.irekeonibudo.ui.components.ChoiceButton
 import com.techducat.irekeonibudo.ui.components.IllustrationFrame
 import com.techducat.irekeonibudo.ui.components.PlayerStatusBar
@@ -32,43 +33,45 @@ fun StoryScreen(
     onChoice: (Choice) -> Unit,
     onOpenInventory: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        PlayerStatusBar(player = state.player)
-        AnimatedContent(
-            targetState = state.currentNode,
-            transitionSpec = {
-                (fadeIn(animationSpec = tween(360))) togetherWith
-                    (fadeOut(animationSpec = tween(180)))
-            },
-            modifier = Modifier.weight(1f),
-            label = "storyNodeTransition"
-        ) { node ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.Top
-            ) {
-                IllustrationFrame(modifier = Modifier.padding(top = 12.dp)) {
-                    SceneCanvas(scene = node.scene)
+    AppBackground {
+        Column(modifier = Modifier.fillMaxSize()) {
+            PlayerStatusBar(player = state.player)
+            AnimatedContent(
+                targetState = state.currentNode,
+                transitionSpec = {
+                    (fadeIn(animationSpec = tween(360))) togetherWith
+                        (fadeOut(animationSpec = tween(180)))
+                },
+                modifier = Modifier.weight(1f),
+                label = "storyNodeTransition"
+            ) { node ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    IllustrationFrame(modifier = Modifier.padding(top = 12.dp)) {
+                        SceneCanvas(scene = node.scene)
+                    }
+                    Text(
+                        text = node.title,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            shadow = Shadow(color = EmberGold.copy(alpha = 0.25f), offset = Offset(0f, 0f), blurRadius = 16f)
+                        ),
+                        modifier = Modifier.padding(top = 18.dp, bottom = 8.dp)
+                    )
+                    Text(
+                        text = node.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+                    state.availableChoices(node).forEach { choice ->
+                        ChoiceButton(text = choice.text, onClick = { onChoice(choice) })
+                    }
+                    ChoiceButton(text = "🎒  Inventory", onClick = onOpenInventory)
                 }
-                Text(
-                    text = node.title,
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        shadow = Shadow(color = EmberGold.copy(alpha = 0.25f), offset = Offset(0f, 0f), blurRadius = 16f)
-                    ),
-                    modifier = Modifier.padding(top = 18.dp, bottom = 8.dp)
-                )
-                Text(
-                    text = node.text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-                state.availableChoices(node).forEach { choice ->
-                    ChoiceButton(text = choice.text, onClick = { onChoice(choice) })
-                }
-                ChoiceButton(text = "🎒  Inventory", onClick = onOpenInventory)
             }
         }
     }
